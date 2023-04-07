@@ -1,0 +1,169 @@
+module: ietf-incident
+  +--ro incidents
+     +--ro incident* [incident-id]
+        +--ro incident-id string
+        +--ro csn? uint64
+        +--ro service-instance* string
+        +--ro name? string
+        +--ro type? enumeration
+        +--ro domain? identityref
+        +--ro priority? incident-priority
+        +--ro status? enumeration
+        +--ro ack-status? enumeration
+        +--ro category? identityref
+        +--ro tenant? string
+        +--ro detail? string
+        +--ro resolve-suggestion? string
+        +--ro sources
+        |  +--ro source* [node]
+        |     +--ro node -> /nw:networks/nw:network/nw:node/nw-inv:name
+        |     +--ro resource* [name]
+        |        +--ro name al:resource
+        +--ro root-causes
+        |  +--ro root-cause* [node]
+        |     +--ro node -> /nw:networks/nw:network/nw:node/nw-inv:name
+        |     +--ro resource* [name]
+        |     |  +--ro name al:resource
+        |     |  +--ro cause-name? string
+        |     |  +--ro detail? string
+        |     +--ro cause-name? string
+        |     +--ro detail? string
+        +--ro events
+        |  +--ro event* [type original-node]
+        |     +--ro type enumeration
+        |     +--ro original-node union
+        |     +--ro is-root? boolean
+        |     +--ro (event-type-info)?
+        |        +--:(alarm)
+        |        |  +--ro alarm
+        |        |     +--ro resource? leafref
+        |        |     +--ro alarm-type-id? leafref
+        |        |     +--ro alarm-type-qualifier? leafref
+        |        +--:(notification)
+        |        +--:(log)
+        |        +--:(KPI)
+        |        +--:(unknown)
+        +--ro raise-time? yang:date-and-time
+        +--ro occur-time? yang:date-and-time
+        +--ro clear-time? yang:date-and-time
+        +--ro ack-time? yang:date-and-time
+        +--ro last-updated? yang:date-and-time
+  rpcs:
+    +---x incident-acknowledge
+    |  +---w input
+    |  |  +---w incident-id* string
+    |  +--ro output
+    +---x incident-diagnose
+    |  +---w input
+    |  |  +---w incident-id* string
+    |  +--ro output
+    |     +--ro incident* [incident-id]
+    |        +--ro incident-id string
+    |        +--ro (result)?
+    |           +--:(success)
+    |           |  +--ro csn? uint64
+    |           |  +--ro service-instance* string
+    |           |  +--ro name? string
+    |           |  +--ro type? enumeration
+    |           |  +--ro domain? identityref
+    |           |  +--ro priority? incident-priority
+    |           |  +--ro status? enumeration
+    |           |  +--ro ack-status? enumeration
+    |           |  +--ro category? identityref
+    |           |  +--ro tenant? string
+    |           |  +--ro detail? string
+    |           |  +--ro resolve-suggestion? string
+    |           |  +--ro sources
+    |           |  |  +--ro source* [node]
+    |           |  |     +--ro node leafref
+    |           |  |     +--ro resource* [name]
+    |           |  |        +--ro name al:resource
+    |           |  +--ro root-causes
+    |           |  |  +--ro root-cause* [node]
+    |           |  |     +--ro node leafref
+    |           |  |     +--ro resource* [name]
+    |           |  |     |  +--ro name al:resource
+    |           |  |     |  +--ro cause-name? string
+    |           |  |     |  +--ro detail? string
+    |           |  |     +--ro cause-name? string
+    |           |  |     +--ro detail? string
+    |           |  +--ro events
+    |           |  |  +--ro event* [type original-node]
+    |           |  |     +--ro type enumeration
+    |           |  |     +--ro original-node union
+    |           |  |     +--ro is-root? boolean
+    |           |  |     +--ro (event-type-info)?
+    |           |  |        +--:(alarm)
+    |           |  |        |  +--ro alarm
+    |           |  |        |     +--ro resource? leafref
+    |           |  |        |     +--ro alarm-type-id? leafref
+    |           |  |        |     +--ro alarm-type-qualifier? leafref
+    |           |  |        +--:(notification)
+    |           |  |        +--:(log)
+    |           |  |        +--:(KPI)
+    |           |  |        +--:(unknown)
+    |           |  +--ro time? yang:date-and-time
+    |           +--:(failure)
+    |              +--ro error-code? string
+    |              +--ro error-message? string
+    +---x incident-resolve
+       +---w input
+       |  +---w incident* [incident-id]
+       |     +---w incident-id
+       |             -> /inc:incidents/inc:incident/inc:incident-id
+       |     +---w resolved? empty
+       +--ro output
+          +--ro incident* [incident-id]
+             +--ro incident-id string
+             +--ro (result)?
+                +--:(success)
+                |  +--ro success? empty
+                |  +--ro time? yang:date-and-time
+                +--:(failure)
+                   +--ro error-code? string
+                   +--ro error-message? string
+  notifications:
+    +---n incident-notification
+       +--ro incident-id? string
+       +--ro csn? uint64
+       +--ro service-instance* string
+       +--ro name? string
+       +--ro type? enumeration
+       +--ro domain? identityref
+       +--ro priority? incident-priority
+       +--ro status? enumeration
+       +--ro ack-status? enumeration
+       +--ro category? identityref
+       +--ro tenant? string
+       +--ro detail? string
+       +--ro resolve-suggestion? string
+       +--ro sources
+       |  +--ro source* [node]
+       |     +--ro node -> /nw:networks/nw:network/nw:node/nw-inv:name
+       |     +--ro resource* [name]
+       |        +--ro name al:resource
+       +--ro root-causes
+       |  +--ro root-cause* [node]
+       |     +--ro node -> /nw:networks/nw:network/nw:node/nw-inv:name
+       |     +--ro resource* [name]
+       |     |  +--ro name al:resource
+       |     |  +--ro cause-name? string
+       |     |  +--ro detail? string
+       |     +--ro cause-name? string
+       |     +--ro detail? string
+       +--ro events
+       |  +--ro event* [type original-node]
+       |     +--ro type enumeration
+       |     +--ro original-node union
+       |     +--ro is-root? boolean
+       |     +--ro (event-type-info)?
+       |        +--:(alarm)
+       |        |  +--ro alarm
+       |        |     +--ro resource? leafref
+       |        |     +--ro alarm-type-id? leafref
+       |        |     +--ro alarm-type-qualifier? leafref
+       |        +--:(notification)
+       |        +--:(log)
+       |        +--:(KPI)
+       |        +--:(unknown)
+       +--ro time? yang:date-and-time
