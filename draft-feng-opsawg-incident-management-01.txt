@@ -1,0 +1,1960 @@
+
+
+
+
+OPSAWG                                                      C. Feng, Ed.
+Internet-Draft                                                    Huawei
+Intended status: Standards Track                                   T. Hu
+Expires: 18 November 2023                                           CMCC
+                                                           LM. Contreras
+                                                          Telefonica I+D
+                                                                   Q. Wu
+                                                                   C. Yu
+                                                                  Huawei
+                                                             17 May 2023
+
+
+                Incident Management for Network Services
+                draft-feng-opsawg-incident-management-01
+
+Abstract
+
+   This document provides an architecture for the incident management
+   system and related function interface requirements.
+
+   This document also defines a YANG module to support the incident
+   lifecycle management.  This YANG module is meant to provide a
+   standard way to report, diagnose, and resolve incidents for the sake
+   of enhanced network services.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 18 November 2023.
+
+Copyright Notice
+
+   Copyright (c) 2023 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+
+
+
+
+Feng, et al.            Expires 18 November 2023                [Page 1]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   4
+   3.  Sample Use Cases  . . . . . . . . . . . . . . . . . . . . . .   5
+     3.1.  Incident-Based Trouble Tickets dispatching  . . . . . . .   5
+     3.2.  Fault Locating  . . . . . . . . . . . . . . . . . . . . .   6
+     3.3.  Fault Labelling . . . . . . . . . . . . . . . . . . . . .   6
+     3.4.  Energy Conservation . . . . . . . . . . . . . . . . . . .   7
+   4.  Incident Management Architecture  . . . . . . . . . . . . . .   7
+     4.1.  Cooperation with Alarm Management . . . . . . . . . . . .   9
+     4.2.  Cooperation with SAIN . . . . . . . . . . . . . . . . . .  10
+     4.3.  Relationship with RFC8969 . . . . . . . . . . . . . . . .  10
+   5.  Functional Interface Requirements between the Client and the
+           Agent . . . . . . . . . . . . . . . . . . . . . . . . . .  10
+     5.1.  Incident Identification . . . . . . . . . . . . . . . . .  10
+     5.2.  Incident Diagnosis  . . . . . . . . . . . . . . . . . . .  13
+     5.3.  Incident Resolution . . . . . . . . . . . . . . . . . . .  14
+   6.  Incident Data Model Concepts  . . . . . . . . . . . . . . . .  14
+     6.1.  Identifying the Incident Instance . . . . . . . . . . . .  14
+     6.2.  The Incident Lifecycle  . . . . . . . . . . . . . . . . .  14
+       6.2.1.  Incident Instance Lifecycle . . . . . . . . . . . . .  14
+       6.2.2.  Operator Incident Lifecycle . . . . . . . . . . . . .  15
+   7.  Incident Data Model . . . . . . . . . . . . . . . . . . . . .  15
+     7.1.  Overview  . . . . . . . . . . . . . . . . . . . . . . . .  15
+     7.2.  Incident Notifications  . . . . . . . . . . . . . . . . .  16
+     7.3.  Incident Acknowledge  . . . . . . . . . . . . . . . . . .  18
+     7.4.  Incident Diagnose . . . . . . . . . . . . . . . . . . . .  18
+     7.5.  Incident Resolution . . . . . . . . . . . . . . . . . . .  18
+   8.  Incident Management YANG Module . . . . . . . . . . . . . . .  19
+   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  31
+     9.1.  The "IETF XML" Registry . . . . . . . . . . . . . . . . .  31
+     9.2.  The "YANG Module Names" Registry  . . . . . . . . . . . .  31
+   10. Security Considerations . . . . . . . . . . . . . . . . . . .  31
+   11. Contributors  . . . . . . . . . . . . . . . . . . . . . . . .  32
+   12. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  32
+   13. References  . . . . . . . . . . . . . . . . . . . . . . . . .  32
+     13.1.  Normative References . . . . . . . . . . . . . . . . . .  32
+     13.2.  Informative References . . . . . . . . . . . . . . . . .  33
+
+
+
+Feng, et al.            Expires 18 November 2023                [Page 2]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+   Appendix A.  Changes between revisions  . . . . . . . . . . . . .  34
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  34
+
+1.  Introduction
+
+   Network performance management and fault management are used for
+   monitoring and troubleshooting separately in networking
+   infrastructures.  Typically, metrics and alarms, transaction
+   operations are monitored centrally and incident tickets are triggered
+   accordingly.  A YANG [RFC7950] data model for alarm management
+   [RFC8632] defines a standard interface for alarm management.
+
+   A data model for Network and VPN Service Performance Monitoring
+   [RFC9375] defines a standard interface for performance management.
+   In addition, distributed tracing mechanism defined in [W3C-Trace-
+   Context] can also be used to follow, analyze and debug operations,
+   such as configuration transactions, across multiple distributed
+   systems.
+
+   However, alarm-centric solution described in [RFC8632], performance-
+   centric solution described in [RFC9375] and trace context-centric
+   solution are based on a data source specific information and
+   maintenance engineers' experience and fall short when keeping track
+   of them separately in various different management systems, e.g., the
+   frequency and quantity of alarms reported to Operating Support System
+   (OSS) increased dramatically (in many cases multiple orders of
+   magnitude) with the growth of service types and complexity, hard to
+   aggregate in a single domain along with key performance metrics,
+   various different events, notifications, overwhelm OSS platforms,
+   result in low processing efficiency, inaccurate root cause
+   identification and duplicated tickets.
+
+   Usually, the network modeling from device to different connection and
+   service layers follows some existing standards.  Once there are some
+   failures happened on network devices, there could be some correlative
+   alarms appeared on the upper layers.  Theoretically, it is possible
+   to compress a series of alarms into fewer incidents.  The traditional
+   working manner is also based on this correlation relationship.  But
+   the traditional working manner is time-consuming and labor-intensive
+   which reduces efficiency.  Additionally, it quite depends on the
+   experience of maintenance engineers.  Moreover, the investigation of
+   some faults also depends on some other data like topology data or
+   performance data.  This complicates network troubleshooting, and the
+   correlation of alarms and network services.  Therefore, it is
+   difficult to assess the impact of alarms on network services.
+
+
+
+
+
+
+Feng, et al.            Expires 18 November 2023                [Page 3]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+   To address these challenges, an incident-centric solution is
+   proposed, which also supports cross-domain or cross-layer root cause
+   analysis and network troubleshooting.  A network incident refers to
+   an unexpected interruption of a network service, degradation of a
+   network service quality, or sub-health of a network service.
+   Different data source including alarms, metrics and other anomaly
+   information can be aggregated into few amount of incidents by
+   correlation analysis and the impact of network services can be
+   assessed based on incidents.  For example, the protocols related to
+   the interface fail to work properly due to the interface down, many
+   alarms may be reported to upper layer management system and can be
+   aggregated into one incident, some network services may be affected
+   by this incident (e.g.  L3VPN services related with the interface
+   will become unavailable).  An incident may also be raised through the
+   analysis of some network performance metrics, for example, as
+   described in SAIN [I-D.ietf-opsawg-service-assurance-architecture],
+   network services can be decomposed to some sub-services, some metrics
+   are monitored for sub-services, symptoms will occur if services/sub-
+   services are unhealthy(after analyzing metrics), these symptoms may
+   raise one incident, and it may cause degradation of the network
+   service.
+
+   Artificial Intelligence (AI) and Machine Learning (ML) play a
+   important role in the processing of large amounts of data with
+   complex correlations.  For example, Neural Network Algorithm or
+   Hierarchy Aggregation Algorithm can be used to replace manual alarm
+   correlation.  Through online and offline learning, these algorithms
+   can be continuously optimized to improve the efficiency of fault
+   diagnosis.
+
+   This document defines the concepts, requirements, and architecture of
+   incident management.  The document also defines a YANG data model for
+   incident lifecycle management, which improves troubleshooting
+   efficiency, ensures network service quality, and improves network
+   automation [RFC8969].
+
+2.  Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in BCP
+   14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+   The following terms are defined in [RFC8632] are not redefined here:
+
+   *  alarm
+
+
+
+
+Feng, et al.            Expires 18 November 2023                [Page 4]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+   The following terms are defined in this document:
+
+   Incident:  An unexpected interruption of a network service,
+      degradation of network service quality, or sub-health of a network
+      service.
+
+
+   Incident management:  Lifecycle management of incidents including
+      incident identification, reporting, acknowledge, diagnosis, and
+      resolution.
+
+   Incident management system:  An entity which implements incident
+      management.  It include incident management agent and incident
+      management client.
+
+   Incident management agent:  An entity which provides some functions
+      of incident management.  For example, it can detect an incident,
+      perform incident diagnosis, resolution and prediction,etc.
+
+   Incident management client:  An entity which can manage incidents.
+      For example, it can receive incident notifications, query the
+      information of incidents, instruct the incident management agent
+      to diagnose, resolve, etc.
+
+3.  Sample Use Cases
+
+3.1.  Incident-Based Trouble Tickets dispatching
+
+   Currently, the dispatching of trouble tickets is mostly based on
+   dispatching alarms.  Some operators' maintenance engineers monitor
+   and identify alarms which could link to the same fault.  Then they
+   dispatch these alarms to the same trouble ticket, which is in low
+   automation.  If there are many alarms, then the human costs are
+   increased accordingly.
+
+   Some operators preset whitelist and adopt some coarse granularity
+   association rules for the alarm management.  It seems to improve
+   fault management automation.  However, some trouble tickets could be
+   missed if the filtering conditions are too tight.  If the filtering
+   conditions are too loose, multiple trouble tickets would be
+   dispatched to the same fault.
+
+
+
+
+
+
+
+
+
+
+Feng, et al.            Expires 18 November 2023                [Page 5]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+   It is hard to achieve a perfect balance between the automation and
+   duplicated trouble tickets under the traditional working situations.
+   However, with the help of incident management, massive alarms can be
+   aggregated into a few incidents, multiple trouble tickets will be
+   saved.  At the same time, incident management can keep high accuracy
+   and automation.  This could be an answer to this pain point of
+   traditional trouble ticket dispatching
+
+3.2.  Fault Locating
+
+   Currently, to accomplish fault isolation and locating work,
+   maintenance experts need to combine topology data, service data with
+   huge amount of alarm data to do the analysis.  Sometimes they also
+   require some cooperation from the construction engineers who work on
+   site, to operate fixing attempts on devices and then further
+   investigation the root cause is required.
+
+   For example, for a common cable interruption, maintenance experts
+   need to analyze the root cause alarm from massive alarms, and then
+   trace the root alarm to the faulty span segment by segment.  Next,
+   site engineers perform tests at the source station to locate the
+   interruption and locate the faulty optical exchange station.  Then
+   travel to the located optical exchange station to replace or splice
+   fibers.  During the whole process, multiple people are needed inside
+   and outside the site.
+
+   With the help of incident management, the system can automatically
+   locate the faulty span, and eliminate the need for manual analysis.
+   By cooperating with the integrated OTDR within the equipment, we can
+   determine the target optical exchange station before site visits.
+   Multiple site visits and time are saved.
+
+3.3.  Fault Labelling
+
+   Fiber cutover is a common maintenance scenario for Operators.  During
+   the cutover process, maintenance experts must identify affected
+   devices based on the cutover object and their experience.  They will
+   give these devices a mark to remind other maintenance engineers that
+   it is not necessary to dispatch trouble tickets before the ending of
+   cutover.
+
+   However, depending on human experience, it is very likely to make
+   some mistakes.  For example, some devices are missing to mark and
+   some devices are marked incorrectly.  If the devices are missing to
+   mark, some trouble tickets will be dispatched during cutover, which
+   are not needed actually.  If the devices are wrongly marked, some
+   fault not related to this cutover will be missing.
+
+
+
+
+Feng, et al.            Expires 18 November 2023                [Page 6]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+   With incident management, maintenance experts only need to mark the
+   cutover objects and do not need to mark the devices that would be
+   affected.  Because of the alarm aggregation capabilities and knowing
+   the relationship between root cause alarm and correlative alarm, the
+   fault management system can automatically identify correlative
+   alarms, without dispatching any trouble tickets to the affected
+   devices.
+
+3.4.  Energy Conservation
+
+   Under the global trend of energy conservation, emission reduction and
+   safety management, more and more enterprises have joined the energy
+   conservation and emission reduction ranks and adopted measures to
+   turn off the power after work during non-working hours, making due
+   contributions to the green earth.  However, this proactive power-off
+   measure periodically generates a large number of alarms on the
+   network, and the traditional Operation and Management system can not
+   effectively identify such non-real faults caused by the enterprise
+   users? operations.  Operators need to manually identify and rectify
+   faults based on expert experience, wasting a large number of human
+   resources.
+
+   Incident management can intelligently identify faults caused by
+   periodic power-off on the tenant side and directly identify faults.
+   As a result, operators do not need to dispatch trouble tickets for
+   such faults any more, this can help to reduce human resource costs.
+
+4.  Incident Management Architecture
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Feng, et al.            Expires 18 November 2023                [Page 7]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+               +----------------------+-------------------+
+               |                                          |
+               |            Incident Management Client    |
+               |                                          |
+               |                                          |
+               +------------+---------+---------+---------+
+                  ^         |         |         |
+                  |Incident |Incident |Incident |Incident
+                  |Report   |Ack      |Diagnose |Resolve
+                  |         |         |         |
+                  |         V         V         V
+               +--+-------------------+---------+----------+
+               |                                           |
+               |                                           |
+               |            Incident Management Agent      |
+               |                                           |
+               |                                           |
+               |                                           |
+               |                                           |
+               +----------------------+-----+--+-----------+
+                     ^       ^Abnormal         ^
+                     |Alarm  |Operations       |Metrics
+                     |Report |Report           |/Telemetry
+                     |       |                 V
+        +--------+-+-+-------+--------------++------------------+
+        |                                                       |
+        |                     Network                           |
+        |                                                       |
+        +------------------------------------+------------------+
+
+
+                 Figure 1: Incident Management Architecture
+
+   Figure 1 illustrates the incident management architecture.  Two key
+   components for the incident management are incident management client
+   and incident management agent.
+
+   Incident management agent can be deployed in network analytics
+   platform, controllers or Orchestrators and provides functionalities
+   such as incident identification, report, diagnosis, resolution,
+   querying for incident lifecycle management.
+
+   Incident management client can be deployed in the network OSS or
+   other business systems of operators and invokes the functionalities
+   provided by incident management agent to meet the business
+   requirements of fault management.
+
+   A typical workflow of incident management is as follows:
+
+
+
+Feng, et al.            Expires 18 November 2023                [Page 8]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+   *  Some alarms or abnormal operations, network performance metrics
+      are reported from the network.  Incident management agent receives
+      these alarms/abnormal operations/metrics and try to analyze the
+      correlation of them, if the incidents are identified, it will be
+      reported to the client.  The impact of network services will be
+      also analyzed and will update the incident.
+
+   *  Incident management client receives the incident raised by agent,
+      and acknowledge it.  Client may invoke the 'incident diagnose' rpc
+      to diagnose this incident to find the root causes.
+
+   *  If the root causes have been found, the client can resolve this
+      incident by invoking the 'incident resolve' rpc operation,
+      dispatching a ticket or using other functions (e.g. routing
+      calculation,configuration)
+
+4.1.  Cooperation with Alarm Management
+
+   YANG model for alarm management[RFC8632] defines a standard interface
+   to manage the lifecycle of alarms.  Alarms represent the undesirable
+   state of network resources, alarm data model also defines the root
+   causes and impacted services fields, but there may be lack of enough
+   information to determine them in lower layer system, so alarms do not
+   always tell the status of services or the root causes.  Alarm
+   management act as a starting point for high-level fault management,
+   alarms can work as data source of incident agent and may be
+   aggregated into few amount of incidents by correlation analysis,
+   network service impact and root causes may be determined during
+   incident process.
+
+   Incident also contains some related alarms,if needed users can query
+   the information of alarms by alarm management interface [RFC8632].
+   In some cases, e.g. cutover scenario, incident agent may use alarm
+   management interface [RFC8632] to shelve some alarms.
+
+   Alarm management may keep the original process, alarms are reported
+   from network to network controller or analytics and then reported to
+   upper layer system(e.g.  OSS).  Upper layer system may store these
+   alarms and provide the information for fault analysis (e.g. deeper
+   analysis based on incident).
+
+
+
+
+
+
+
+
+
+
+
+Feng, et al.            Expires 18 November 2023                [Page 9]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+4.2.  Cooperation with SAIN
+
+   SAIN [I-D.ietf-opsawg-service-assurance-architecture] defines the
+   architecture of network service assurance.  A network service can be
+   decomposed into some sub-services, and some metrics can be monitored
+   for sub-services.  For example, a tunnel service can be decomposed
+   into some peer tunnel interface sub-services and IP connective sub-
+   service.  If some metrics are evaluated to indicate unhealthy sub-
+   services, some symptoms will occur.  Incident agent may identify the
+   incident based on symptoms, and then report it to upper layer system.
+   So, SAIN can be one way to identify incident, services, sub-services
+   and metrics can be preconfigured via APIs defined by service
+   assurance YANG model [I-D.ietf-opsawg-service-assurance-yang] and
+   incident will be reported if symptoms match the condition of
+   incident.
+
+4.3.  Relationship with RFC8969
+
+   RFC8969[RFC8969] defines a framework for network automation using
+   YANG, this framework divides YANG modules into three layers, service
+   layer, network layer and device layer, and contains service
+   deployment, service optimization/assurance, and service diagnosis.
+   Incident works on network layer and aggregates alarms, metrics and
+   other information from device layer, it's helpful for service
+   assurance.  And incident diagnosis may be one way of service
+   diagnosis.
+
+5.  Functional Interface Requirements between the Client and the Agent
+
+5.1.  Incident Identification
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 10]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+           +--------------+
+        +--|  Incident1   |
+        |  +--+-----------+
+        |     |  +-----------+
+        |     +--+  alarm1   |
+        |     |  +-----------+
+        |     |
+        |     |  +-----------+
+        |     +--+  alarm2   |
+        |     |  +-----------+
+        |     |
+        |     |  +-----------+
+        |     +--+  alarm3   |
+        |        +-----------+
+        |  +--------------+
+        +--|  Incident2   |
+        |  +--+-----------+
+        |     |  +-----------+
+        |     +--+  metric1  |
+        |     |  +-----------+
+        |     |  +-----------+
+        |     +--+  metric2  |
+        |        +-----------+
+        |
+        |  +--------------+
+        +--|  Incident3   |
+           +--+-----------+
+              |  +-----------+
+              +--+ alarm1    |
+              |  +-----------+
+              |
+              |  +-----------+
+              +--| metric1   |
+                 +-----------+
+
+                     Figure 2: Incident Identification
+
+   As described in Figure 2, multiple alarms, metrics, or hybrid can be
+   aggregated into an incident after analysis.
+
+   The incident management agent MUST be capable of identifying
+   incidents.  Multiple alarms, metrics and other information are
+   reported to incident agent, and the agent must analyze it and find
+   out the correlations of them, if the correlation match the incident
+   rules, incident will be identified and reported to the client.
+   Service impact analysis will be performed if an indent is identified,
+   and the content of incident will be updated if impacted network
+   services are detected.
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 11]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+   AI/ML may be used to identify the incident.  Expert system and online
+   learning can help AI to identify the correlation of alarms, metrics
+   and other information by time-base correlation algorithm, topo-based
+   correlation algorithm, etc.  For example, if interface is down, then
+   many protocol alarms will be reported, AI will think these alarms
+   have some correlations.  These correlations will be put into
+   knowledge base, and the incident will be identified faster according
+   to knowledge base next time.
+
+   As mentioned above, SAIN is another way to implement incident
+   identification.  Observation timestamp defined in
+   [I-D.tgraf-yang-push-observation-time] and trace context defined in
+   [W3C-Trace-Context] may be helpful for incident identification.
+
+                        +----------------------+
+                        |                      |
+                        |     Orchestrator     |
+                        |                      |
+                        +----+-----------------+
+                             ^VPN A Unavailable
+                             |
+                         +---+----------------+
+                         |                    |
+                         |     Controller     |
+                         |                    |
+                         |                    |
+                         +-+-+-+-----+--+-----+
+                         ^ ^            ^
+                     IGP | |Interface   |IGP Peer
+                    Down | |Down        | Abnormal
+                         | |            |
+        VPN A            | |            |
+       +-----------------+-+------------+------------------*
+       | \  +---+       ++-++         +-+-+        +---+  /|
+       |  \ |   |       |   |         |   |        |   | / |
+       |   \|PE1+-------| P1+X--------|P2 +--------|PE2|/  |
+       |    +---+       +---+         +---+        +---+   |
+       +---------------------------------------------------+
+
+
+               Figure 3: Example 1 of Incident Identification
+
+   As described in Figure 3, vpn a is deployed from PE1 to PE2, if a
+   interface of P1 is going down, many alarms are triggered, such as
+   interface down, igp down, and igp peer abnormal from P2.  These
+   alarms are aggregated and analyzed by controller, and the incident
+   'vpn unavailable' is triggered by the controller.
+
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 12]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+                       +----------------------+
+                       |                      |
+                       |     Orchestrator     |
+                       |                      |
+                       +----+-----------------+
+                            ^VPN A Degradation
+                            |
+                        +---+----------------+
+                        |                    |
+                        |     controller     |
+                        |                    |
+                        |                    |
+                        +-+-+-+-----+--+-----+
+                          ^            ^
+                          |Packet      |Path Delay
+                          |Loss        |
+                          |            |
+       VPN A              |            |
+      +-------------------+------------+-------------------+
+      | \  +---+       ++-++         +-+-+        +---+  / |
+      |  \ |   |       |   |         |   |        |   | /  |
+      |   \|PE1+-------|P1 +---------|P2 +--------|PE2|/   |
+      |    +---+       +---+         +---+        +---+    |
+      +----------------------------------------------------+
+
+
+               Figure 4: Example 2 of Incident Identification
+
+   As described in Figure 4, controller collect the network metrics from
+   network elements, it finds the packet loss of P1 and the path delay
+   of P2 exceed the thresholds, an incident 'VPN A degradation' may be
+   triggered after analysis.
+
+5.2.  Incident Diagnosis
+
+   After an incident is reported to the incident management client, the
+   client MAY diagnose the incident to determine the root cause.  Some
+   diagnosis operations may affect the running network services.  The
+   client can choose not to perform that diagnosis operation after
+   determining the impact is not trivial.  The incident management agent
+   can also perform self-diagnosis.  However, the self-diagnosis MUST
+   not affect the running network services.  Possible diagnosis methods
+   include link reachability detection, link quality detection, alarm/
+   log analysis, and short-term fine-grained monitoring of network
+   quality metrics, etc.
+
+
+
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 13]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+5.3.  Incident Resolution
+
+   After the root cause is diagnosed, the client MAY resolve the
+   incident.  The client MAY choose resolve the incident by invoking
+   other functions, such as routing calculation function, configuration
+   function, dispatching a ticket or asking the agent to resolve it.
+   Generally, the client would attempt to directly resolve the root
+   cause.  If the root cause cannot be resolved, an alternative solution
+   SHOULD be required.  For example, if an incident caused by a physical
+   component failure, it cannot be automatically resolved, the standby
+   link can be used to bypass the faulty component.
+
+   Incident agent will monitor the status of incident, if the faults are
+   fixed, the agent will update the status of incident to 'cleared', and
+   report the updated incident to the client.
+
+   Incident resolution may affect the running network services.  The
+   client can choose not to perform those operations after determining
+   the impact is not trivial.
+
+6.  Incident Data Model Concepts
+
+6.1.  Identifying the Incident Instance
+
+   An incident ID is used as an identifier of an incident instance, if
+   an incident instance is identified, a new incident ID is created.
+   The incident ID MUST be unique in the whole system.
+
+6.2.  The Incident Lifecycle
+
+6.2.1.  Incident Instance Lifecycle
+
+   From an incident instance perspective, an incident can have the
+   following lifecycle: 'raised', 'updated', 'cleared'.  When an
+   incident is generated, the status is 'raised'.  If the status changes
+   after the incident is generated, (for example, self-diagnosis,
+   diagnosis command issued by the client, or any other condition causes
+   the status to change but does not reach the 'cleared' level.) , the
+   status changes to 'updated'.  When an incident is successfully
+   resolved, the status changes to 'cleared'.
+
+
+
+
+
+
+
+
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 14]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+6.2.2.  Operator Incident Lifecycle
+
+   From an operator perspective, the lifecycle of an incident instance
+   includes 'acknowledged', 'diagnosed', and 'resolved'.  When an
+   incident instance is generated, the operator SHOULD acknowledge the
+   incident.  And then the operator attempts to diagnose the incident
+   (for example, find out the root cause and affected components).
+   Diagnosis is not mandatory.  If the root cause and affected
+   components are known when the incident is generated, diagnosis is not
+   required.  After locating the root cause and affected components,
+   operator can try to resolve the incident.
+
+7.  Incident Data Model
+
+7.1.  Overview
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 15]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+   module: ietf-incident
+     +--ro incidents
+        +--ro incident* [incident-id]
+           +--ro incident-id string
+           +--ro csn? uint64
+           +--ro service-instance* string
+           +--ro name? string
+           +--ro type? enumeration
+           +--ro domain? identityref
+           +--ro priority? int:incident-priority
+           +--ro status? enumeration
+           +--ro ack-status? enumeration
+           +--ro category? identityref
+           +--ro detail? string
+           +--ro resolve-advice? string
+           +--ro sources
+           ...
+           +--ro root-causes
+           ...
+           +--ro root-events
+           ...
+           +--ro events
+           ...
+           +--ro raise-time? yang:date-and-time
+           +--ro occur-time? yang:date-and-time
+           +--ro clear-time? yang:date-and-time
+           +--ro ack-time? yang:date-and-time
+           +--ro last-updated? yang:date-and-time
+     rpcs:
+       +---x incident-acknowledge
+       ...
+       +---x incident-diagnose
+       ...
+       +---x incident-resolve
+
+     notifications:
+       +---n incident-notification
+          +--ro incident-id?
+                  -> /inc:incidents/inc:incident/inc:incident-id
+          ...
+          +--ro time? yang:date-and-time
+
+7.2.  Incident Notifications
+
+
+
+
+
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 16]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+     notifications:
+       +---n incident-notification
+          +--ro incident-id?
+                  -> /inc:incidents/inc:incident/inc:incident-id
+          +--ro csn? uint64
+          +--ro service-instance* string
+          +--ro name? string
+          +--ro type? enumeration
+          +--ro domain? identityref
+          +--ro priority? int:incident-priority
+          +--ro status? enumeration
+          +--ro ack-status? enumeration
+          +--ro category? identityref
+          +--ro detail? string
+          +--ro resolve-advice? string
+          +--ro sources
+          |  +--ro source* [node]
+          |     +--ro node -> /nw:networks/nw:network/nw:node/nw:node-id
+          |     +--ro resource* [name]
+          |        +--ro name al:resource
+          +--ro root-causes
+          |  +--ro root-cause* [node]
+          |     +--ro node -> /nw:networks/nw:network/nw:node/nw:node-id
+          |     +--ro resource* [name]
+          |     |  +--ro name al:resource
+          |     |  +--ro cause-name? string
+          |     |  +--ro detail? string
+          |     +--ro cause-name? string
+          |     +--ro detail? string
+          +--ro root-events
+          |  +--ro root-event* [type event-id]
+          |     +--ro type -> ../../../events/event/type
+          |     +--ro event-id leafref
+          +--ro events
+          |  +--ro event* [type event-id]
+          |     +--ro type enumeration
+          |     +--ro event-id string
+          |     +--ro (event-type-info)?
+          |        +--:(alarm)
+          |        |  +--ro alarm
+          |        |     +--ro resource? leafref
+          |        |     +--ro alarm-type-id? leafref
+          |        |     +--ro alarm-type-qualifier? leafref
+          |        +--:(notification)
+          |        +--:(log)
+          |        +--:(KPI)
+          |        +--:(unknown)
+          +--ro time? yang:date-and-time
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 17]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+   A general notification, incident-notification, is provided here.
+   When an incident instance is identified, the notification will be
+   sent.  After a notification is generated, if the incident management
+   agent performs self diagnosis or the client uses the interfaces
+   provided by the incident management agent to deliver diagnosis and
+   resolution actions, the notification update behavior is triggered,
+   for example, the root cause objects and affected objects are updated.
+   When an incident is successfully resolved, the status of the incident
+   would be set to 'cleared'.
+
+7.3.  Incident Acknowledge
+
+       +---x incident-acknowledge
+       |  +---w input
+       |  |  +---w incident-id*
+       |  |          -> /inc:incidents/inc:incident/inc:incident-id
+
+   After an incident is generated, updated, or cleared, (In some
+   scenarios where automatic diagnosis and resolution are supported, the
+   status of an incident may be updated multiple times or even
+   automatically resolved.)  The operator needs to confirm the incident
+   to ensure that the client knows the incident.
+
+   The incident-acknowledge rpc can confirm multiple incidents at a time
+
+7.4.  Incident Diagnose
+
+       +---x incident-diagnose
+       |  +---w input
+       |  |  +---w incident-id*
+       |  |          -> /inc:incidents/inc:incident/inc:incident-id
+
+   After an incident is generated, incident diagnose rpc can be used to
+   diagnose the incident and locate the root causes.  Diagnosis can be
+   performed on some detection tasks, such as BFD detection, flow
+   detection, telemetry collection, short-term threshold alarm,
+   configuration error check, or test packet injection.
+
+   After the diagnosis is performed, a incident update notification will
+   be triggered to report the latest status of the incident.
+
+7.5.  Incident Resolution
+
+       +---x incident-resolve
+          +---w input
+          |  +---w incident-id*
+          |          -> /inc:incidents/inc:incident/inc:incident-id
+
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 18]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+   After the root causes and impacts are determined, incident-resolve
+   rpc can be used to resolve the incident (if the agent can resolve
+   it).  How to resolve an incident instance is out of the scope of this
+   document.
+
+   Incident resolve rpc allows multiple incident instances to be
+   resolved at a time.  If an incident instance is successfully
+   resolved, a notification will be triggered to update the incident
+   status to 'cleared'.  If the incident content is changed during this
+   process, a notification update will be triggered.
+
+8.  Incident Management YANG Module
+
+   <CODE BEGINS>
+          file="ietf-incident-types@2023-05-16.yang"
+   module ietf-incident-types {
+     yang-version "1.1";
+     namespace "urn:ietf:params:xml:ns:yang:ietf-incident-types";
+     prefix "int";
+
+     import ietf-network {
+       prefix nw;
+       reference
+         "RFC 8345: A YANG Data Model for Network Topologies";
+     }
+
+     organization
+       "IETF OPSAWG Working Group";
+     contact
+       "WG Web:   <https://datatracker.ietf.org/wg/opsawg/>;
+        WG List:  <mailto:opsawg@ietf.org>
+        Author:   Chong Feng  <mailto:frank.fengchong@huawei.com>
+        Author:   Tong Hu  <mailto:hutong@cmhi.chinamobile.com>
+        Author:   Luis Miguel Contreras Murillo <mailto:
+                  luismiguel.contrerasmurillo@telefonica.com>
+        Author :  Qin Wu   <mailto:bill.wu@huawei.com>
+        Author:   ChaoDe Yu   <mailto:yuchaode@huawei.com>";
+
+     description
+       "This module defines the identities and typedefs for
+        incident management.
+
+        Copyright (c) 2022 IETF Trust and the persons identified as
+        authors of the code.  All rights reserved.
+
+        Redistribution and use in source and binary forms, with or
+        without modification, is permitted pursuant to, and subject
+        to the license terms contained in, the Revised BSD License
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 19]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+        set forth in Section 4.c of the IETF Trust's Legal Provisions
+        Relating to IETF Documents
+        (https://trustee.ietf.org/license-info).
+        This version of this YANG module is part of RFC XXXX; see the
+        RFC itself for full legal notices.  ";
+     revision 2023-05-16 {
+       description "initial version";
+       reference "RFC XXX: Yang module for incident management.";
+     }
+     //identities
+     identity incident-domain {
+       description "The abstract identity to indicate the domain of
+                    an incident.";
+     }
+     identity single-domain {
+       base incident-domain;
+       description "single domain.";
+     }
+     identity access {
+       base single-domain;
+       description "access domain.";
+     }
+     identity ran {
+       base access;
+       description "radio access network domain.";
+     }
+     identity transport {
+       base single-domain;
+       description "transport domain.";
+     }
+     identity otn {
+       base transport;
+       description "optical transport network domain.";
+     }
+     identity ip {
+       base single-domain;
+       description "ip domain.";
+     }
+     identity ptn {
+       base ip;
+       description "packet transport network domain.";
+     }
+
+     identity cross-domain {
+       base incident-domain;
+       description "cross domain.";
+     }
+     identity incident-category {
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 20]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+       description "The abstract identity for incident category.";
+     }
+     identity device {
+       base incident-category;
+       description "device category.";
+     }
+     identity power-enviorment {
+       base device;
+       description "power system category.";
+     }
+     identity device-hardware {
+       base device;
+       description "hardware of device category.";
+     }
+     identity device-software {
+       base device;
+       description "software of device category";
+     }
+     identity line {
+       base device-hardware;
+       description "line card category.";
+     }
+     identity maintenance {
+       base incident-category;
+       description "maintenance category.";
+     }
+     identity network {
+       base incident-category;
+       description "network category.";
+     }
+     identity protocol {
+       base incident-category;
+       description "protocol category.";
+     }
+     identity overlay {
+       base incident-category;
+       description "overlay category";
+     }
+     identity vm {
+       base incident-category;
+       description "vm category.";
+     }
+
+     //typedefs
+     typedef incident-priority {
+       type enumeration {
+         enum critical {
+           description "the incident MUST be handled immediately.";
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 21]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+         }
+         enum high {
+           description "the incident should be handled as soon as
+                        possible.";
+         }
+         enum medium {
+           description "network services are not affected, or the
+                        services are slightly affected,but corrective
+                        measures need to be taken.";
+         }
+         enum low {
+           description "potential or imminent service-affecting
+                        incidents are detected,but services are
+                        not affected currently.";
+         }
+       }
+       description "define the priority of incident.";
+     }
+     typedef node-ref {
+       type leafref {
+         path "/nw:networks/nw:network/nw:node/nw:node-id";
+       }
+       description "reference a network node.";
+     }
+   }
+   <CODE ENDS>
+
+   <CODE BEGINS>
+          file="ietf-incident@2023-05-16.yang"
+   module ietf-incident {
+     yang-version 1.1;
+     namespace "urn:ietf:params:xml:ns:yang:ietf-incident";
+     prefix inc;
+     import ietf-yang-types {
+       prefix yang;
+       reference
+         "RFC 6991: Common YANG Data Types";
+     }
+
+     import ietf-alarms {
+       prefix al;
+       reference
+         "RFC 8632: A YANG Data Model for Alarm Management";
+     }
+
+     import ietf-incident-types {
+       prefix int;
+       reference
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 22]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+         "draft-feng-opsawg-incident-management: Incident
+          Management for Network Services";
+     }
+     organization
+       "IETF OPSAWG Working Group";
+     contact
+       "WG Web:   <https://datatracker.ietf.org/wg/opsawg/>;
+        WG List:  <mailto:opsawg@ietf.org>
+        Author:   Chong Feng  <mailto:frank.fengchong@huawei.com>
+        Author:   Tong Hu  <mailto:hutong@cmhi.chinamobile.com>
+        Author:   Luis Miguel Contreras Murillo <mailto:
+                  luismiguel.contrerasmurillo@telefonica.com>
+        Author :  Qin Wu   <mailto:bill.wu@huawei.com>
+        Author:   ChaoDe Yu   <mailto:yuchaode@huawei.com>";
+
+    description
+       "This module defines the interfaces for incident management
+        lifecycle.
+
+        This module is intended for the following use cases:
+        * incident lifecycle management:
+          - incident report: report incident instance to client
+                             when an incident instance is detected.
+          - incident acknowledge: acknowledge an incident instance.
+          - incident diagnose: diagnose an incident instance.
+          - incident resolve: resolve an incident instance.
+
+        Copyright (c) 2022 IETF Trust and the persons identified as
+        authors of the code.  All rights reserved.
+
+        Redistribution and use in source and binary forms, with or
+        without modification, is permitted pursuant to, and subject
+        to the license terms contained in, the Revised BSD License
+        set forth in Section 4.c of the IETF Trust's Legal Provisions
+        Relating to IETF Documents
+        (https://trustee.ietf.org/license-info).
+        This version of this YANG module is part of RFC XXXX; see the
+        RFC itself for full legal notices.  ";
+     revision 2023-05-16 {
+       description "remove identies and typedefs to independent yang
+                    module. update some definitions of data model.";
+     }
+     revision 2023-03-13 {
+       description "initial version";
+       reference "RFC XXX: Yang module for incident management.";
+     }
+
+     //groupings
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 23]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+     grouping resources-info {
+       description "the grouping which defines the network
+                    resources of a node.";
+       leaf node {
+         type int:node-ref;
+         description "reference to a network node.";
+       }
+       list resource {
+         key name;
+         description "the resources of a network node.";
+         leaf name {
+            type al:resource;
+            description "network resource name.";
+         }
+       }
+     }
+
+     grouping incident-time-info {
+       description "the grouping defines incident time information.";
+       leaf raise-time {
+         type yang:date-and-time;
+         description "the time when an incident instance is raised.";
+       }
+       leaf occur-time {
+         type yang:date-and-time;
+         description "the time when an incident instance is occured.
+                      It's the occur time of the first event during
+                      incident detection.";
+       }
+       leaf clear-time {
+         type yang:date-and-time;
+         description "the time when an incident instance is
+                      resolved.";
+       }
+       leaf ack-time {
+         type yang:date-and-time;
+         description "the time when an incident instance is
+                      acknowledged.";
+       }
+       leaf last-updated {
+         type yang:date-and-time;
+         description "the latest time when an incident instance is
+                      updated";
+       }
+     }
+
+     grouping incident-info {
+       description "the grouping defines the information of an
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 24]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+                    incident.";
+       leaf csn {
+         type uint64;
+         mandatory true;
+         description "The sequence number of the incident instance.";
+       }
+       leaf-list service-instance {
+         type string;
+         description "the related network service instances of
+                      the incident instance.";
+       }
+       leaf name {
+         type string;
+         mandatory true;
+         description "the name of an incident.";
+       }
+       leaf type {
+         type enumeration {
+           enum fault {
+             description "It indicates the type of the incident
+                          is a fault, for example an interface
+                          fails to work.";
+           }
+           enum potential-risk {
+             description "It indicates the type of the incident
+                          is a potential risk, for example high
+                          CPU rate may cause a fault in the
+                          future.";
+           }
+         }
+         mandatory true;
+         description "The type of an incident.";
+       }
+       leaf domain {
+         type identityref {
+           base int:incident-domain;
+         }
+         mandatory true;
+         description "the domain of an incident.";
+       }
+       leaf priority {
+         type int:incident-priority;
+         mandatory true;
+         description "the priority of an incident instance.";
+       }
+
+       leaf status {
+         type enumeration {
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 25]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+           enum raised {
+             description "an incident instance is raised.";
+           }
+           enum updated {
+             description "the information of an incident instance
+                          is updated.";
+           }
+           enum cleared {
+             description "an incident is cleared.";
+           }
+         }
+         default raised;
+         description "The status of an incident instance.";
+       }
+       leaf ack-status {
+         type enumeration {
+           enum acknowledged;
+           enum unacknowledged;
+         }
+         default unacknowledged;
+         description "the acknowledge status of an incident.";
+       }
+       leaf category {
+         type identityref {
+           base int:incident-category;
+         }
+         mandatory true;
+         description "The category of an incident.";
+       }
+       leaf detail {
+         type string;
+         description "detail information of this incident.";
+       }
+       leaf resolve-advice {
+         type string;
+         description "The advice to resolve this incident.";
+       }
+       container sources {
+         description "The source components.";
+         list source {
+           key node;
+           uses resources-info;
+           min-elements 1;
+           description "The source components of incident.";
+         }
+       }
+
+       container root-causes{
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 26]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+         description "The root cause objects.";
+         list root-cause {
+           key node;
+           description "the root causes of incident.";
+           grouping root-cause-info {
+             description "The information of root cause.";
+             leaf cause-name {
+               type string;
+               description "the name of cause";
+             }
+             leaf detail {
+               type string;
+               description "the detail information of the cause.";
+             }
+           }
+           uses resources-info {
+             augment resource {
+               description "augment root cause information.";
+               //if root cause object is a resource of a node
+               uses root-cause-info;
+             }
+           }
+           //if root cause object is a node
+           uses root-cause-info;
+         }
+       }
+       container root-events {
+         list root-event {
+           key "type event-id";
+           leaf type {
+             type leafref {
+               path "../../../events/event/type";
+             }
+           }
+           leaf event-id {
+             type leafref {
+               path "../../../events/event[type = current()/../type]"
+                   +"/event-id";
+             }
+           }
+         }
+       }
+       container events {
+         description "related events.";
+         list event {
+           key "type event-id";
+           description "related events.";
+           leaf type {
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 27]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+             type enumeration {
+               enum alarm {
+                 description "alarm type";
+               }
+               enum inform {
+                 description "inform type";
+               }
+               enum KPI {
+                 description "KPI type";
+               }
+               enum unknown {
+                 description "unknown type";
+               }
+             }
+             description "event type.";
+           }
+           leaf event-id {
+             type string;
+             description "the event identifier, such as uuid,
+                          sequence number, etc.";
+           }
+           choice event-type-info {
+             description "event type information.";
+             case alarm {
+               when "type = 'alarm'";
+               container alarm {
+                 description "alarm type event.";
+                 leaf resource {
+                   type leafref {
+                     path "/al:alarms/al:alarm-list/al:alarm"
+                         +"/al:resource";
+                   }
+                   description "network resource.";
+                   reference "RFC 8632: A YANG Data Model for Alarm
+                              Management";
+                 }
+                 leaf alarm-type-id {
+                   type leafref {
+                     path "/al:alarms/al:alarm-list/al:alarm"
+                         +"[al:resource = current()/../resource]"
+                         +"/al:alarm-type-id";
+                   }
+                   description "alarm type id";
+                   reference "RFC 8632: A YANG Data Model for Alarm
+                               Management";
+                 }
+                 leaf alarm-type-qualifier {
+                   type leafref {
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 28]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+                     path "/al:alarms/al:alarm-list/al:alarm"
+                         +"[al:resource = current()/../resource]"
+                         +"[al:alarm-type-id = current()/.."
+                         +"/alarm-type-id]/al:alarm-type-qualifier";
+                   }
+                   description "alarm type qualitifier";
+                   reference "RFC 8632: A YANG Data Model for Alarm
+                              Management";
+                 }
+               }
+             }
+             case notification {
+               //TODO
+             }
+             case log {
+             //TODO
+             }
+             case KPI {
+             //TODO
+             }
+             case unknown {
+             //TODO
+             }
+           }
+         }
+
+       }
+
+     }
+
+     //data definitions
+     container incidents {
+       config false;
+       description "the information of incidents.";
+       list incident {
+         key incident-id;
+         description "the information of incident.";
+         leaf incident-id {
+           type string;
+           description "the identifier of an incident instance.";
+         }
+         uses incident-info;
+         uses incident-time-info;
+       }
+     }
+
+     // notifications
+     notification incident-notification {
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 29]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+       description "incident notification. It will be triggered when
+                    the incident is raised, updated or cleared.";
+       leaf incident-id {
+         type leafref {
+           path "/inc:incidents/inc:incident/inc:incident-id";
+         }
+         description "the identifier of an incident instance.";
+       }
+       uses incident-info;
+       leaf time {
+         type yang:date-and-time;
+         description "occur time of an incident instance.";
+       }
+     }
+     // rpcs
+     rpc incident-acknowledge {
+       description "This rpc can be used to acknowledge the specified
+                    incidents.";
+       input {
+         leaf-list incident-id {
+           type leafref {
+             path "/inc:incidents/inc:incident/inc:incident-id";
+           }
+           description "the identifier of an incident instance.";
+         }
+       }
+     }
+     rpc incident-diagnose {
+       description "This rpc can be used to diagnose the specified
+                    incidents. The result of diagnosis will be reported
+                    by incident notification.";
+       input {
+         leaf-list incident-id {
+           type leafref {
+             path "/inc:incidents/inc:incident/inc:incident-id";
+           }
+           description
+             "the identifier of an incident instance.";
+         }
+       }
+     }
+
+     rpc incident-resolve {
+       description "This rpc can be used to resolve the specified
+                    incidents. The result of resolution will be reported
+                    by incident notification.";
+       input {
+         list incident {
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 30]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+           key incident-id;
+           min-elements 1;
+           description "incident instances.";
+           leaf incident-id {
+             type leafref {
+               path "/inc:incidents/inc:incident/inc:incident-id";
+             }
+             description
+               "the identifier of an incident instance.";
+           }
+         }
+       }
+     }
+   }
+   <CODE ENDS>
+
+9.  IANA Considerations
+
+9.1.  The "IETF XML" Registry
+
+   This document registers one XML namespace URN in the 'IETF XML
+   registry', following the format defined in [RFC3688].
+
+   URI: urn:ietf:params:xml:ns:yang:ietf-incident
+   Registrant Contact: The IESG.
+   XML: N/A, the requested URIs are XML namespaces.
+
+9.2.  The "YANG Module Names" Registry
+
+   This document registers one module name in the 'YANG Module Names'
+   registry, defined in [RFC6020].
+
+   name: ietf-incident
+   prefix: inc
+   namespace: urn:ietf:params:xml:ns:yang:ietf-incident
+   RFC: XXXX
+   // RFC Ed.: replace XXXX and remove this comment
+
+10.  Security Considerations
+
+   The YANG modules specified in this document define a schema for data
+   that is designed to be accessed via network management protocol such
+   as NETCONF [RFC6241] or RESTCONF [RFC8040].  The lowest NETCONF layer
+   is the secure transport layer, and the mandatory-to-implement secure
+   transport is Secure Shell (SSH) [RFC6242].  The lowest RESTCONF layer
+   is HTTPS, and the mandatory-to-implement secure transport is TLS
+   [RFC8446].
+
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 31]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+   The Network Configuration Access Control Model (NACM) [RFC8341]
+   provides the means to restrict access for particular NETCONF or
+   RESTCONF users to a preconfigured subset of all available NETCONF or
+   RESTCONF protocol operations and content.
+
+   There are a number of data nodes defined in this YANG module that are
+   writable/creatable/deletable (i.e., config true, which is the
+   default).  These data nodes may be considered sensitive or vulnerable
+   in some network environments.  Write operations (e.g., edit-config)
+   to these data nodes without proper protection can have a negative
+   effect on network operations.  These are the subtrees and data nodes
+   and their sensitivity/vulnerability:
+
+   Some of the readable data nodes in this YANG module may be considered
+   sensitive or vulnerable in some network environments.  It is thus
+   important to control read access (e.g., via get, get-config, or
+   notification) to these data nodes.  These are the subtrees and data
+   nodes and their sensitivity/vulnerability:
+
+   Some of the RPC operations in this YANG module may be considered
+   sensitive or vulnerable in some network environments.  It is thus
+   important to control access to these operations.  These are the
+   operations and their sensitivity/vulnerability:
+
+11.  Contributors
+
+   Aihua Guo
+   Futurewei Technologies
+   Email: aihuaguo.ietf@gmail.com
+
+12.  Acknowledgments
+
+   The authors would like to thank Mohamed Boucadair, Thomas Graf,
+   Robert Wilton, Benoit Claise, Oscar Gonzalez de Dios, Mahesh
+   Jethanandani, Balazs Lengyel, Bo Wu, Qiufang Ma, Zhidong Yin,
+   Guoxiang Liu, Haomian Zheng, YuanYao for their valuable comments and
+   great input to this work.
+
+13.  References
+
+13.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 32]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+   [RFC3688]  Mealling, M., "The IETF XML Registry", BCP 81, RFC 3688,
+              DOI 10.17487/RFC3688, January 2004,
+              <https://www.rfc-editor.org/info/rfc3688>.
+
+   [RFC6020]  Bjorklund, M., Ed., "YANG - A Data Modeling Language for
+              the Network Configuration Protocol (NETCONF)", RFC 6020,
+              DOI 10.17487/RFC6020, October 2010,
+              <https://www.rfc-editor.org/info/rfc6020>.
+
+   [RFC7950]  Bjorklund, M., Ed., "The YANG 1.1 Data Modeling Language",
+              RFC 7950, DOI 10.17487/RFC7950, August 2016,
+              <https://www.rfc-editor.org/info/rfc7950>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
+
+13.2.  Informative References
+
+   [I-D.ietf-opsawg-service-assurance-architecture]
+              Claise, B., Quilbeuf, J., Lopez, D., Voyer, D., and T.
+              Arumugam, "Service Assurance for Intent-based Networking
+              Architecture", Work in Progress, Internet-Draft, draft-
+              ietf-opsawg-service-assurance-architecture-13, 3 January
+              2023, <https://datatracker.ietf.org/doc/html/draft-ietf-
+              opsawg-service-assurance-architecture-13>.
+
+   [I-D.ietf-opsawg-service-assurance-yang]
+              Claise, B., Quilbeuf, J., Lucente, P., Fasano, P., and T.
+              Arumugam, "YANG Modules for Service Assurance", Work in
+              Progress, Internet-Draft, draft-ietf-opsawg-service-
+              assurance-yang-11, 3 January 2023,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-opsawg-
+              service-assurance-yang-11>.
+
+   [I-D.tgraf-yang-push-observation-time]
+              Graf, T., Claise, B., and A. Huang Feng, "Support of
+              Network Observation Timestamping in YANG Notifications", 6
+              March 2023, <https://www.ietf.org/id/draft-tgraf-yang-
+              push-observation-time-00.html>.
+
+   [RFC8345]  Clemm, A., Medved, J., Varga, R., Bahadur, N.,
+              Ananthakrishnan, H., and X. Liu, "A YANG Data Model for
+              Network Topologies", RFC 8345, DOI 10.17487/RFC8345, March
+              2018, <https://www.rfc-editor.org/info/rfc8345>.
+
+
+
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 33]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+   [RFC8632]  Vallin, S. and M. Bjorklund, "A YANG Data Model for Alarm
+              Management", RFC 8632, DOI 10.17487/RFC8632, September
+              2019, <https://www.rfc-editor.org/info/rfc8632>.
+
+   [RFC8969]  Wu, Q., Ed., Boucadair, M., Ed., Lopez, D., Xie, C., and
+              L. Geng, "A Framework for Automating Service and Network
+              Management with YANG", RFC 8969, DOI 10.17487/RFC8969,
+              January 2021, <https://www.rfc-editor.org/info/rfc8969>.
+
+   [RFC9375]  Wu, B., Ed., Wu, Q., Ed., Boucadair, M., Ed., Gonzalez de
+              Dios, O., and B. Wen, "A YANG Data Model for Network and
+              VPN Service Performance Monitoring", RFC 9375,
+              DOI 10.17487/RFC9375, April 2023,
+              <https://www.rfc-editor.org/info/rfc9375>.
+
+   [W3C-Trace-Context]
+              W3C, "W3C Recommendation on Trace Context", 23 November
+              2021, <https://www.w3.org/TR/2021/REC-trace-context-
+              1-20211123/>.
+
+Appendix A.  Changes between revisions
+
+   [[RFC editor: please remove this section before publication.]]
+
+   v00 - v01
+
+   *  Modify the introduction.
+
+   *  Add the cooperation with alarm management.
+
+   *  Add the cooperation with SAIN.
+
+   *  Add the relationship with RFC8969.
+
+   *  Add the relationship with observation timestamp and trace context.
+
+   *  Clarify the incident identification process.
+
+   *  Modify the work flow of incident diagnosis and resolution.
+
+   *  Remove identities and typedefs from ietf-incident YANG module, and
+      create a new YANG module called ietf-incident-types.
+
+   *  Modify ietf-incident YANG module, for example, modify incident-
+      diagnose rpc and incident-resolve rpc.
+
+Authors' Addresses
+
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 34]
+
+Internet-Draft             Incident Management                  May 2023
+
+
+   Chong Feng (editor)
+   Huawei
+   101 Software Avenue, Yuhua District
+   Nanjing
+   Jiangsu, 210012
+   China
+   Email: frank.fengchong@huawei.com
+
+
+   Tong Hu
+   China Mobile (Hangzhou) Information Technology Co., Ltd
+   Building A01, 1600 Yuhangtang Road, Wuchang Street, Yuhang District
+   Hangzhou
+   ZheJiang, 311121
+   China
+   Email: hutong@cmhi.chinamobile.com
+
+
+   Luis Miguel Contreras Murillo
+   Telefonica I+D
+   Madrid
+   Spain
+   Email: luismiguel.contrerasmurillo@telefonica.com
+
+
+   Qin Wu
+   Huawei
+   101 Software Avenue, Yuhua District
+   Nanjing
+   Jiangsu, 210012
+   China
+   Email: bill.wu@huawei.com
+
+
+   Chaode Yu
+   Huawei
+   Email: yuchaode@huawei.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Feng, et al.            Expires 18 November 2023               [Page 35]
