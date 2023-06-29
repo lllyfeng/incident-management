@@ -122,12 +122,10 @@
         <email>bill.wu@huawei.com</email>
       </address>
     </author>
-
-    <author fullname="Chaode Yu" initials="C." surname="Yu">
-      <organization>Huawei</organization>
-
+    <author fullname="Nigel Davis" initials="N." surname="Davis">
+      <organization>Ciena</organization>
       <address>
-        <email>yuchaode@huawei.com</email>
+        <email>ndavis@ciena.com</email>
       </address>
     </author>
 
@@ -140,11 +138,12 @@
     <keyword>Incident Lifecycle Management</keyword>
 
     <abstract>
-      <t>This document provides an architecture for the incident management
-      system and related function interface requirements.</t>
+      <t>This document introduces incident management solution and provides an
+          architecture and related function interface requirements for the incident
+          management system.</t>
 
-      <t>This document also defines a YANG module to support the incident
-      lifecycle management. This YANG module is meant to provide a standard
+      <t>This document also defines YANG modules to support the incident
+      lifecycle management. The YANG modules are meant to provide a standard
       way to report, diagnose, and resolve incidents for the sake of enhanced
       network services.</t>
     </abstract>
@@ -155,13 +154,12 @@
       <t>Network performance management and fault management are used for
       monitoring and troubleshooting separately in networking infrastructures.
       Typically, metrics and alarms, transaction operations are monitored
-      centrally and incident tickets are triggered accordingly. A YANG <xref
-      target="RFC7950"/> data model for alarm management <xref
-      target="RFC8632"/> defines a standard interface for alarm
-      management.</t>
+          centrally and incident tickets are triggered accordingly. </t>
 
-      <t>A data model for Network and VPN Service Performance Monitoring
-      <xref target="RFC9375"/> defines a standard interface for
+
+      <t>A YANG <xref target="RFC7950"/> data model for alarm management <xref target="RFC8632"/>
+          defines a standard interface for alarm management.A data model for Network and VPN Service
+          Performance Monitoring<xref target="RFC9375"/> defines a standard interface for
       performance management. In addition, distributed tracing mechanism
       defined in [W3C-Trace-Context] can also be used to follow, analyze and
       debug operations, such as configuration transactions, across multiple
@@ -178,38 +176,30 @@
       domain along with key performance metrics, various different events,
       notifications, overwhelm OSS platforms, result in low processing
       efficiency, inaccurate root cause identification and duplicated
-      tickets.</t>
+      tickets. And, it is difficult to assess the impact of alarms, performance metrics and other
+      anomaly data on network services.  </t>
 
-      <t>Usually, the network modeling from device to different connection and
-      service layers follows some existing standards. Once there are some
-      failures happened on network devices, there could be some correlative
-      alarms appeared on the upper layers. Theoretically, it is possible to
-      compress a series of alarms into fewer incidents. The
-      traditional working manner is also based on this correlation
-      relationship. But the traditional working manner is time-consuming and
-      labor-intensive which reduces efficiency. Additionally, it quite
-      depends on the experience of maintenance engineers. Moreover, the
-      investigation of some faults also depends on some other data like
-      topology data or performance data. This complicates network
-      troubleshooting, and the correlation of alarms and network services. Therefore, it
-      is difficult to assess the impact of alarms on network services.</t>
+      <t>Network devices are connected through various protocols and links to form a network.
+      Once a component is faulty or degraded, other components related to the component will be affected,
+      which will generate a large number of alarms, performance events, and other events. So,it is possible to
+      compress a series of correlative alarms,performance metrics and other anomaly data into fewer incidents.
+      There are many solutions in the market today that essentially do this to some degree. But the traditional
+      solutions are time-consuming and labor-intensive which reduces efficiency. Additionally, it quite depends
+      on the experience of maintenance engineers.</t>
 
-      <t>To address these challenges, an incident-centric solution is
-      proposed, which also supports cross-domain or cross-layer root cause
-      analysis and network troubleshooting. A network incident refers to an
-      unexpected interruption of a network service, degradation of a network
-      service quality, or sub-health of a network service. Different data source including
-      alarms, metrics and other anomaly information can be aggregated into few amount of incidents
-      by correlation analysis and the impact of network services can be assessed based on incidents.
+      <t>To address these challenges, an incident-centric solution is proposed, which also supports cross-domain
+      or cross-layer root cause analysis and network troubleshooting. A network incident refers to an unexpected
+      interruption of a network service, degradation of a network service quality, or sub-health of a network service.
+      Different data sources including alarms, metrics and other anomaly information can be aggregated into few amount
+      of incidents  by correlation analysis and the impact of network services can be assessed based on incidents.
       For example, the protocols related to the interface fail to work properly due to the
       interface down, many alarms may be reported to upper layer management system and can be aggregated
       into one incident, some network services may be affected by this incident (e.g. L3VPN services
-      related with the interface will become unavailable). An
-      incident may also be raised through the analysis of some network performance metrics, for example,
-      as described in SAIN <xref target="I-D.ietf-opsawg-service-assurance-architecture"/>,
+      related with the interface will become unavailable). An incident may also be raised through the analysis
+      of some network performance metrics, for example, as described in SAIN <xref target="I-D.ietf-opsawg-service-assurance-architecture"/>,
       network services can be decomposed to some sub-services, some metrics are monitored for sub-services,
       symptoms will occur if services/sub-services are unhealthy(after analyzing metrics), these symptoms
-      may raise one incident, and it may cause degradation of the network service.</t>
+      may raise one incident, and it may cause degradation of the network services.</t>
 
       <t>Artificial Intelligence (AI) and Machine Learning (ML) play a
       important role in the processing of large amounts of data with complex
@@ -395,7 +385,7 @@
       incident management client and incident management agent.</t>
 
       <t>Incident management agent can be deployed in network analytics
-      platform, controllers or Orchestrators and provides functionalities such
+      platform, controllers and provides functionalities such
       as incident identification, report, diagnosis, resolution, querying for
       incident lifecycle management.</t>
 
@@ -422,21 +412,80 @@
           calculation,configuration)</t>
         </list></t>
         <section title="Cooperation with Alarm Management">
+            <figure anchor="figure_5" title="cooperation with alarm management">
+                <artwork>
+   +-----------------------------+
+   |         OSS                 |
+   |+-------+      +-----------+ |
+   ||alarm  |      | incident  | |
+   ||handler|      |  client   | |
+   |+-------+      +-----------+ |
+   +---^---------------^---------+
+       |               |
+       |alarm          |incident
+   +---|---------------|---------+
+   |   |  controller   |         |
+   |   |               |         |
+   |+--+---++      +-----------+ |
+   ||alarm  |      |           | |
+   ||process+----->|  incident | |
+   ||       |alarm |   agent   | |
+   |+------++      +-----------+ |
+   |   ^              ^          |
+   +---+--------------|----------+
+       |alarm         | metrics/trace/etc.
+       |              |
+   +---+--------------+----------+
+   |         network             |
+   |                             |
+   +-----------------------------+
+                </artwork>
+            </figure>
             <t>YANG model for alarm management<xref target="RFC8632"/> defines a standard interface to manage the lifecycle of alarms.
             Alarms represent the undesirable state of network resources, alarm data model also defines the root
             causes and impacted services fields, but there may be lack of enough information to determine them in lower
-            layer system, so alarms do not always tell the status of services or the root causes. Alarm management act as
-            a starting point for high-level fault management, alarms can work as data source of incident agent and
-            may be aggregated into few amount of incidents by correlation analysis, network service impact and root causes
-            may be determined during incident process.</t>
+            layer system (mainly in devices level), so alarms do not always tell the status of services or the root causes.
+            As described in <xref target="RFC8632"/>, alarm management act as a starting point for high-level fault management. While incident management
+            often works in network level, so it's possible to have enough information to perform correlation and service impact analysis.
+            Alarms can work as one of data sources of incident management and may be aggregated into few amount of incidents by
+            correlation analysis, network service impact and root causes may be determined during incident process.</t>
             <t>Incident also contains some related alarms,if needed users can query the information of alarms by
             alarm management interface <xref target="RFC8632"/>. In some cases, e.g. cutover scenario, incident agent may
             use alarm management interface <xref target="RFC8632"/> to shelve some alarms.</t>
             <t>Alarm management may keep the original process, alarms are reported from network to network controller or
             analytics and then reported to upper layer system(e.g. OSS). Upper layer system may store these alarms and
             provide the information for fault analysis (e.g. deeper analysis based on incident).</t>
+            <t>Compared with alarm management, incident management provides not only incident reporting but also diagnosis and resolution functions,
+            it's possible to support self-healing and may be helpful for single-domain closed-loop control.</t>
+            <t>Incident management is not a substitute for alarm management. Instead, they cooperate with each other to implement fault management. </t>
         </section>
         <section title="Cooperation with SAIN">
+            <figure anchor="figure_6" title="cooperation with SAIN">
+                <artwork>
+          +----------------+
+          | incident client|
+          +----------------+
+                  ^
+                  |incident
+          +-------+--------+
+          | incident agent |
+          +----------------+
+                  ^
+                  |symptoms
+          +-------+--------+
+          |     SAIN       |
+          |                |
+          +----------------+
+                  ^
+                  |metrics
+    +-------------+-------------+
+    |                           |
+    |         network           |
+    |                           |
+    +---------------------------+
+
+                </artwork>
+            </figure>
             <t>SAIN <xref target="I-D.ietf-opsawg-service-assurance-architecture"/> defines the architecture of network
             service assurance. A network service can be decomposed into some sub-services, and some metrics can be monitored
             for sub-services. For example, a tunnel service can be decomposed into some peer tunnel interface sub-services
@@ -452,6 +501,13 @@
             service optimization/assurance, and service diagnosis. Incident works on network layer and aggregates alarms,
             metrics and other information from device layer, it's helpful for service assurance. And incident diagnosis may
             be one way of service diagnosis.</t>
+        </section>
+        <section title="Relationship with Trace Context">
+            <t>W3C defines a common trace context<xref target="W3C-Trace-Context"/> for distributed system tracing,
+                <xref target="I-D.rogaglia-netconf-trace-ctx-extension"/> defines a netconf extension for <xref target="W3C-Trace-Context"/>
+                and <xref target="I-D.quilbeuf-opsawg-configuration-tracing"/> defines a mechanism for configuration tracing. If some errors occur
+                when services are deploying, it's very easy to identify these errors by distributed system tracing, and an incident should be reported.
+            </t>
         </section>
     </section>
 
@@ -858,7 +914,7 @@ module ietf-incident-types {
      Author:   Luis Miguel Contreras Murillo <mailto:
                luismiguel.contrerasmurillo@telefonica.com>
      Author :  Qin Wu   <mailto:bill.wu@huawei.com>
-     Author:   ChaoDe Yu   <mailto:yuchaode@huawei.com>";
+     Author:   Nigel Davis   <mailto:ndavis@ciena.com>";
 
   description
     "This module defines the identities and typedefs for
@@ -1031,7 +1087,7 @@ module ietf-incident {
      Author:   Luis Miguel Contreras Murillo <mailto:
                luismiguel.contrerasmurillo@telefonica.com>
      Author :  Qin Wu   <mailto:bill.wu@huawei.com>
-     Author:   ChaoDe Yu   <mailto:yuchaode@huawei.com>";
+     Author:   Nigel Davis   <mailto:ndavis@ciena.com>";
 
  description
     "This module defines the interfaces for incident management
@@ -1489,13 +1545,49 @@ Aihua Guo
 Futurewei Technologies
 Email: aihuaguo.ietf@gmail.com</artwork>
         </figure></t>
+        <t>
+            <figure>
+                <artwork>
+Chaode Yu
+Huawei
+yuchaode@huawei.com
+                </artwork>
+            </figure>
+        </t>
+        <t>
+            <figure>
+                <artwork>
+Zhidong Yin
+Huawei
+yinzhidong@huawei.com
+                </artwork>
+            </figure>
+        </t>
+        <t>
+            <figure>
+                <artwork>
+Guoxiang Liu
+Huawei
+liuguoxiang@huawei.com
+                </artwork>
+            </figure>
+        </t>
+        <t>
+            <figure>
+                <artwork>
+Kaichun Wu
+Huawei
+wukaichun@huawei.com
+                </artwork>
+            </figure>
+        </t>
     </section>
 
     <section title="Acknowledgments">
       <t>The authors would like to thank Mohamed Boucadair, Thomas Graf, Robert Wilton,
           Benoit Claise, Oscar Gonzalez de Dios, Mahesh Jethanandani, Balazs Lengyel,
-          Bo Wu, Qiufang Ma, Zhidong Yin, Guoxiang Liu, Haomian Zheng, YuanYao for
-          their valuable comments and great input to this work.</t>
+          Bo Wu, Qiufang Ma, Haomian Zheng, YuanYao for their valuable comments and
+          great input to this work.</t>
     </section>
   </middle>
 
@@ -1556,6 +1648,50 @@ Email: aihuaguo.ietf@gmail.com</artwork>
           <date day="23" month="November" year="2021"/>
         </front>
       </reference>
+        <reference anchor="I-D.rogaglia-netconf-trace-ctx-extension"
+                   target="https://www.ietf.org/archive/id/draft-rogaglia-netconf-trace-ctx-extension-02.html">
+            <front>
+                <title>NETCONF Extension to support Trace Context propagation</title>
+                <author fullname="Roque Gagliano" initials="R" surname="Gagliano">
+                    <organization>Cisco</organization>
+                </author>
+                <author fullname="Kristian Larsson" initials="K" surname="Larsson">
+                    <organization>Deutsche Telekom</organization>
+                </author>
+
+                <author fullname="Jan Lindblad" initials="J." surname="Lindblad">
+                    <organization>Cisco</organization>
+                </author>
+
+                <date day="13" month="March" year="2023"/>
+            </front>
+
+        </reference>
+        <reference anchor="I-D.quilbeuf-opsawg-configuration-tracing"
+                   target="https://www.ietf.org/archive/id/draft-quilbeuf-opsawg-configuration-tracing-01.html">
+            <front>
+                <title>External Transaction ID for Configuration Tracing</title>
+                <author fullname="Jean Quilbeuf" initials="J" surname="Quilbeuf">
+                    <organization>Huawei</organization>
+                </author>
+                <author fullname="Benoit Claise" initials="B" surname="Claise">
+                    <organization>Huawei</organization>
+                </author>
+
+                <author fullname="Thomas Graf" initials="T." surname="Graf">
+                    <organization>Swisscom</organization>
+                </author>
+                <author fullname="Diego R. Lopez" initials="D." surname="Lopez">
+                    <organization>Telefonica I+D</organization>
+                </author>
+                <author fullname="Qiong Sun" initials="Q." surname="Sun">
+                    <organization>China Telecom</organization>
+                </author>
+
+                <date day="13" month="March" year="2023"/>
+            </front>
+
+        </reference>
     </references>
       <section title="Changes between revisions">
           <t>[[RFC editor: please remove this section before publication.]]</t>

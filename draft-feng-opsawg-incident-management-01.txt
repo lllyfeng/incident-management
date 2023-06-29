@@ -5,13 +5,14 @@
 OPSAWG                                                      C. Feng, Ed.
 Internet-Draft                                                    Huawei
 Intended status: Standards Track                                   T. Hu
-Expires: 18 November 2023                                           CMCC
+Expires: 31 December 2023                                           CMCC
                                                            LM. Contreras
                                                           Telefonica I+D
                                                                    Q. Wu
-                                                                   C. Yu
                                                                   Huawei
-                                                             17 May 2023
+                                                                N. Davis
+                                                                   Ciena
+                                                            29 June 2023
 
 
                 Incident Management for Network Services
@@ -19,11 +20,12 @@ Expires: 18 November 2023                                           CMCC
 
 Abstract
 
-   This document provides an architecture for the incident management
-   system and related function interface requirements.
+   This document introduces incident management solution and provides an
+   architecture and related function interface requirements for the
+   incident management system.
 
-   This document also defines a YANG module to support the incident
-   lifecycle management.  This YANG module is meant to provide a
+   This document also defines YANG modules to support the incident
+   lifecycle management.  The YANG modules are meant to provide a
    standard way to report, diagnose, and resolve incidents for the sake
    of enhanced network services.
 
@@ -42,7 +44,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 18 November 2023.
+   This Internet-Draft will expire on 31 December 2023.
 
 Copyright Notice
 
@@ -51,11 +53,9 @@ Copyright Notice
 
 
 
-
-
-Feng, et al.            Expires 18 November 2023                [Page 1]
+Feng, et al.            Expires 31 December 2023                [Page 1]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -79,43 +79,44 @@ Table of Contents
    4.  Incident Management Architecture  . . . . . . . . . . . . . .   7
      4.1.  Cooperation with Alarm Management . . . . . . . . . . . .   9
      4.2.  Cooperation with SAIN . . . . . . . . . . . . . . . . . .  10
-     4.3.  Relationship with RFC8969 . . . . . . . . . . . . . . . .  10
+     4.3.  Relationship with RFC8969 . . . . . . . . . . . . . . . .  11
+     4.4.  Relationship with Trace Context . . . . . . . . . . . . .  12
    5.  Functional Interface Requirements between the Client and the
-           Agent . . . . . . . . . . . . . . . . . . . . . . . . . .  10
-     5.1.  Incident Identification . . . . . . . . . . . . . . . . .  10
-     5.2.  Incident Diagnosis  . . . . . . . . . . . . . . . . . . .  13
-     5.3.  Incident Resolution . . . . . . . . . . . . . . . . . . .  14
-   6.  Incident Data Model Concepts  . . . . . . . . . . . . . . . .  14
-     6.1.  Identifying the Incident Instance . . . . . . . . . . . .  14
-     6.2.  The Incident Lifecycle  . . . . . . . . . . . . . . . . .  14
-       6.2.1.  Incident Instance Lifecycle . . . . . . . . . . . . .  14
-       6.2.2.  Operator Incident Lifecycle . . . . . . . . . . . . .  15
-   7.  Incident Data Model . . . . . . . . . . . . . . . . . . . . .  15
-     7.1.  Overview  . . . . . . . . . . . . . . . . . . . . . . . .  15
-     7.2.  Incident Notifications  . . . . . . . . . . . . . . . . .  16
-     7.3.  Incident Acknowledge  . . . . . . . . . . . . . . . . . .  18
-     7.4.  Incident Diagnose . . . . . . . . . . . . . . . . . . . .  18
-     7.5.  Incident Resolution . . . . . . . . . . . . . . . . . . .  18
-   8.  Incident Management YANG Module . . . . . . . . . . . . . . .  19
-   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  31
-     9.1.  The "IETF XML" Registry . . . . . . . . . . . . . . . . .  31
-     9.2.  The "YANG Module Names" Registry  . . . . . . . . . . . .  31
-   10. Security Considerations . . . . . . . . . . . . . . . . . . .  31
-   11. Contributors  . . . . . . . . . . . . . . . . . . . . . . . .  32
-   12. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  32
-   13. References  . . . . . . . . . . . . . . . . . . . . . . . . .  32
-     13.1.  Normative References . . . . . . . . . . . . . . . . . .  32
-     13.2.  Informative References . . . . . . . . . . . . . . . . .  33
+           Agent . . . . . . . . . . . . . . . . . . . . . . . . . .  12
+     5.1.  Incident Identification . . . . . . . . . . . . . . . . .  12
+     5.2.  Incident Diagnosis  . . . . . . . . . . . . . . . . . . .  15
+     5.3.  Incident Resolution . . . . . . . . . . . . . . . . . . .  16
+   6.  Incident Data Model Concepts  . . . . . . . . . . . . . . . .  16
+     6.1.  Identifying the Incident Instance . . . . . . . . . . . .  16
+     6.2.  The Incident Lifecycle  . . . . . . . . . . . . . . . . .  16
+       6.2.1.  Incident Instance Lifecycle . . . . . . . . . . . . .  16
+       6.2.2.  Operator Incident Lifecycle . . . . . . . . . . . . .  17
+   7.  Incident Data Model . . . . . . . . . . . . . . . . . . . . .  17
+     7.1.  Overview  . . . . . . . . . . . . . . . . . . . . . . . .  17
+     7.2.  Incident Notifications  . . . . . . . . . . . . . . . . .  18
+     7.3.  Incident Acknowledge  . . . . . . . . . . . . . . . . . .  20
+     7.4.  Incident Diagnose . . . . . . . . . . . . . . . . . . . .  20
+     7.5.  Incident Resolution . . . . . . . . . . . . . . . . . . .  20
+   8.  Incident Management YANG Module . . . . . . . . . . . . . . .  21
+   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  33
+     9.1.  The "IETF XML" Registry . . . . . . . . . . . . . . . . .  33
+     9.2.  The "YANG Module Names" Registry  . . . . . . . . . . . .  33
+   10. Security Considerations . . . . . . . . . . . . . . . . . . .  33
+   11. Contributors  . . . . . . . . . . . . . . . . . . . . . . . .  34
+   12. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  35
+   13. References  . . . . . . . . . . . . . . . . . . . . . . . . .  35
+     13.1.  Normative References . . . . . . . . . . . . . . . . . .  35
 
 
 
-Feng, et al.            Expires 18 November 2023                [Page 2]
+Feng, et al.            Expires 31 December 2023                [Page 2]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
-   Appendix A.  Changes between revisions  . . . . . . . . . . . . .  34
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  34
+     13.2.  Informative References . . . . . . . . . . . . . . . . .  35
+   Appendix A.  Changes between revisions  . . . . . . . . . . . . .  37
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  37
 
 1.  Introduction
 
@@ -123,15 +124,15 @@ Internet-Draft             Incident Management                  May 2023
    monitoring and troubleshooting separately in networking
    infrastructures.  Typically, metrics and alarms, transaction
    operations are monitored centrally and incident tickets are triggered
-   accordingly.  A YANG [RFC7950] data model for alarm management
-   [RFC8632] defines a standard interface for alarm management.
+   accordingly.
 
-   A data model for Network and VPN Service Performance Monitoring
-   [RFC9375] defines a standard interface for performance management.
-   In addition, distributed tracing mechanism defined in [W3C-Trace-
-   Context] can also be used to follow, analyze and debug operations,
-   such as configuration transactions, across multiple distributed
-   systems.
+   A YANG [RFC7950] data model for alarm management [RFC8632] defines a
+   standard interface for alarm management.A data model for Network and
+   VPN Service Performance Monitoring[RFC9375] defines a standard
+   interface for performance management.  In addition, distributed
+   tracing mechanism defined in [W3C-Trace-Context] can also be used to
+   follow, analyze and debug operations, such as configuration
+   transactions, across multiple distributed systems.
 
    However, alarm-centric solution described in [RFC8632], performance-
    centric solution described in [RFC9375] and trace context-centric
@@ -144,30 +145,29 @@ Internet-Draft             Incident Management                  May 2023
    aggregate in a single domain along with key performance metrics,
    various different events, notifications, overwhelm OSS platforms,
    result in low processing efficiency, inaccurate root cause
-   identification and duplicated tickets.
+   identification and duplicated tickets.  And, it is difficult to
+   assess the impact of alarms, performance metrics and other anomaly
+   data on network services.
 
-   Usually, the network modeling from device to different connection and
-   service layers follows some existing standards.  Once there are some
-   failures happened on network devices, there could be some correlative
-   alarms appeared on the upper layers.  Theoretically, it is possible
-   to compress a series of alarms into fewer incidents.  The traditional
-   working manner is also based on this correlation relationship.  But
-   the traditional working manner is time-consuming and labor-intensive
-   which reduces efficiency.  Additionally, it quite depends on the
-   experience of maintenance engineers.  Moreover, the investigation of
-   some faults also depends on some other data like topology data or
-   performance data.  This complicates network troubleshooting, and the
-   correlation of alarms and network services.  Therefore, it is
-   difficult to assess the impact of alarms on network services.
-
-
+   Network devices are connected through various protocols and links to
+   form a network.  Once a component is faulty or degraded, other
+   components related to the component will be affected, which will
+   generate a large number of alarms, performance events, and other
+   events.  So,it is possible to compress a series of correlative
+   alarms,performance metrics and other anomaly data into fewer
+   incidents.  There are many solutions in the market today that
+   essentially do this to some degree.  But the traditional solutions
+   are time-consuming and labor-intensive which reduces efficiency.
+   Additionally, it quite depends on the experience of maintenance
+   engineers.
 
 
 
 
-Feng, et al.            Expires 18 November 2023                [Page 3]
+
+Feng, et al.            Expires 31 December 2023                [Page 3]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
    To address these challenges, an incident-centric solution is
@@ -175,7 +175,7 @@ Internet-Draft             Incident Management                  May 2023
    analysis and network troubleshooting.  A network incident refers to
    an unexpected interruption of a network service, degradation of a
    network service quality, or sub-health of a network service.
-   Different data source including alarms, metrics and other anomaly
+   Different data sources including alarms, metrics and other anomaly
    information can be aggregated into few amount of incidents by
    correlation analysis and the impact of network services can be
    assessed based on incidents.  For example, the protocols related to
@@ -190,7 +190,7 @@ Internet-Draft             Incident Management                  May 2023
    are monitored for sub-services, symptoms will occur if services/sub-
    services are unhealthy(after analyzing metrics), these symptoms may
    raise one incident, and it may cause degradation of the network
-   service.
+   services.
 
    Artificial Intelligence (AI) and Machine Learning (ML) play a
    important role in the processing of large amounts of data with
@@ -221,9 +221,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023                [Page 4]
+Feng, et al.            Expires 31 December 2023                [Page 4]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
    The following terms are defined in this document:
@@ -277,9 +277,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023                [Page 5]
+Feng, et al.            Expires 31 December 2023                [Page 5]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
    It is hard to achieve a perfect balance between the automation and
@@ -333,9 +333,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023                [Page 6]
+Feng, et al.            Expires 31 December 2023                [Page 6]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
    With incident management, maintenance experts only need to mark the
@@ -389,9 +389,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023                [Page 7]
+Feng, et al.            Expires 31 December 2023                [Page 7]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
                +----------------------+-------------------+
@@ -432,9 +432,9 @@ Internet-Draft             Incident Management                  May 2023
    and incident management agent.
 
    Incident management agent can be deployed in network analytics
-   platform, controllers or Orchestrators and provides functionalities
-   such as incident identification, report, diagnosis, resolution,
-   querying for incident lifecycle management.
+   platform, controllers and provides functionalities such as incident
+   identification, report, diagnosis, resolution, querying for incident
+   lifecycle management.
 
    Incident management client can be deployed in the network OSS or
    other business systems of operators and invokes the functionalities
@@ -445,9 +445,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023                [Page 8]
+Feng, et al.            Expires 31 December 2023                [Page 8]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
    *  Some alarms or abnormal operations, network performance metrics
@@ -468,17 +468,58 @@ Internet-Draft             Incident Management                  May 2023
 
 4.1.  Cooperation with Alarm Management
 
+      +-----------------------------+
+      |         OSS                 |
+      |+-------+      +-----------+ |
+      ||alarm  |      | incident  | |
+      ||handler|      |  client   | |
+      |+-------+      +-----------+ |
+      +---^---------------^---------+
+          |               |
+          |alarm          |incident
+      +---|---------------|---------+
+      |   |  controller   |         |
+      |   |               |         |
+      |+--+---++      +-----------+ |
+      ||alarm  |      |           | |
+      ||process+----->|  incident | |
+      ||       |alarm |   agent   | |
+      |+------++      +-----------+ |
+      |   ^              ^          |
+      +---+--------------|----------+
+          |alarm         | metrics/trace/etc.
+          |              |
+      +---+--------------+----------+
+      |         network             |
+      |                             |
+      +-----------------------------+
+
+                Figure 2: cooperation with alarm management
+
+
+
+
+
+
+Feng, et al.            Expires 31 December 2023                [Page 9]
+
+Internet-Draft             Incident Management                 June 2023
+
+
    YANG model for alarm management[RFC8632] defines a standard interface
    to manage the lifecycle of alarms.  Alarms represent the undesirable
    state of network resources, alarm data model also defines the root
    causes and impacted services fields, but there may be lack of enough
-   information to determine them in lower layer system, so alarms do not
-   always tell the status of services or the root causes.  Alarm
-   management act as a starting point for high-level fault management,
-   alarms can work as data source of incident agent and may be
-   aggregated into few amount of incidents by correlation analysis,
-   network service impact and root causes may be determined during
-   incident process.
+   information to determine them in lower layer system (mainly in
+   devices level), so alarms do not always tell the status of services
+   or the root causes.  As described in [RFC8632], alarm management act
+   as a starting point for high-level fault management.  While incident
+   management often works in network level, so it's possible to have
+   enough information to perform correlation and service impact
+   analysis.  Alarms can work as one of data sources of incident
+   management and may be aggregated into few amount of incidents by
+   correlation analysis, network service impact and root causes may be
+   determined during incident process.
 
    Incident also contains some related alarms,if needed users can query
    the information of alarms by alarm management interface [RFC8632].
@@ -491,22 +532,60 @@ Internet-Draft             Incident Management                  May 2023
    alarms and provide the information for fault analysis (e.g. deeper
    analysis based on incident).
 
+   Compared with alarm management, incident management provides not only
+   incident reporting but also diagnosis and resolution functions, it's
+   possible to support self-healing and may be helpful for single-domain
+   closed-loop control.
 
-
-
-
-
-
-
-
-
-
-Feng, et al.            Expires 18 November 2023                [Page 9]
-
-Internet-Draft             Incident Management                  May 2023
-
+   Incident management is not a substitute for alarm management.
+   Instead, they cooperate with each other to implement fault
+   management.
 
 4.2.  Cooperation with SAIN
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Feng, et al.            Expires 31 December 2023               [Page 10]
+
+Internet-Draft             Incident Management                 June 2023
+
+
+             +----------------+
+             | incident client|
+             +----------------+
+                     ^
+                     |incident
+             +-------+--------+
+             | incident agent |
+             +----------------+
+                     ^
+                     |symptoms
+             +-------+--------+
+             |     SAIN       |
+             |                |
+             +----------------+
+                     ^
+                     |metrics
+       +-------------+-------------+
+       |                           |
+       |         network           |
+       |                           |
+       +---------------------------+
+
+
+                      Figure 3: cooperation with SAIN
 
    SAIN [I-D.ietf-opsawg-service-assurance-architecture] defines the
    architecture of network service assurance.  A network service can be
@@ -531,7 +610,25 @@ Internet-Draft             Incident Management                  May 2023
    Incident works on network layer and aggregates alarms, metrics and
    other information from device layer, it's helpful for service
    assurance.  And incident diagnosis may be one way of service
+
+
+
+Feng, et al.            Expires 31 December 2023               [Page 11]
+
+Internet-Draft             Incident Management                 June 2023
+
+
    diagnosis.
+
+4.4.  Relationship with Trace Context
+
+   W3C defines a common trace context[W3C-Trace-Context] for distributed
+   system tracing, [I-D.rogaglia-netconf-trace-ctx-extension] defines a
+   netconf extension for [W3C-Trace-Context] and
+   [I-D.quilbeuf-opsawg-configuration-tracing] defines a mechanism for
+   configuration tracing.  If some errors occur when services are
+   deploying, it's very easy to identify these errors by distributed
+   system tracing, and an incident should be reported.
 
 5.  Functional Interface Requirements between the Client and the Agent
 
@@ -557,9 +654,24 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 10]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Feng, et al.            Expires 31 December 2023               [Page 12]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
            +--------------+
@@ -597,9 +709,9 @@ Internet-Draft             Incident Management                  May 2023
               +--| metric1   |
                  +-----------+
 
-                     Figure 2: Incident Identification
+                     Figure 4: Incident Identification
 
-   As described in Figure 2, multiple alarms, metrics, or hybrid can be
+   As described in Figure 4, multiple alarms, metrics, or hybrid can be
    aggregated into an incident after analysis.
 
    The incident management agent MUST be capable of identifying
@@ -613,9 +725,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 11]
+Feng, et al.            Expires 31 December 2023               [Page 13]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
    AI/ML may be used to identify the incident.  Expert system and online
@@ -658,9 +770,9 @@ Internet-Draft             Incident Management                  May 2023
        +---------------------------------------------------+
 
 
-               Figure 3: Example 1 of Incident Identification
+               Figure 5: Example 1 of Incident Identification
 
-   As described in Figure 3, vpn a is deployed from PE1 to PE2, if a
+   As described in Figure 5, vpn a is deployed from PE1 to PE2, if a
    interface of P1 is going down, many alarms are triggered, such as
    interface down, igp down, and igp peer abnormal from P2.  These
    alarms are aggregated and analyzed by controller, and the incident
@@ -669,9 +781,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 12]
+Feng, et al.            Expires 31 December 2023               [Page 14]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
                        +----------------------+
@@ -700,9 +812,9 @@ Internet-Draft             Incident Management                  May 2023
       +----------------------------------------------------+
 
 
-               Figure 4: Example 2 of Incident Identification
+               Figure 6: Example 2 of Incident Identification
 
-   As described in Figure 4, controller collect the network metrics from
+   As described in Figure 6, controller collect the network metrics from
    network elements, it finds the packet loss of P1 and the path delay
    of P2 exceed the thresholds, an incident 'VPN A degradation' may be
    triggered after analysis.
@@ -725,9 +837,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 13]
+Feng, et al.            Expires 31 December 2023               [Page 15]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
 5.3.  Incident Resolution
@@ -781,9 +893,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 14]
+Feng, et al.            Expires 31 December 2023               [Page 16]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
 6.2.2.  Operator Incident Lifecycle
@@ -837,9 +949,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 15]
+Feng, et al.            Expires 31 December 2023               [Page 17]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
    module: ietf-incident
@@ -893,9 +1005,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 16]
+Feng, et al.            Expires 31 December 2023               [Page 18]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
      notifications:
@@ -949,9 +1061,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 17]
+Feng, et al.            Expires 31 December 2023               [Page 19]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
    A general notification, incident-notification, is provided here.
@@ -1005,9 +1117,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 18]
+Feng, et al.            Expires 31 December 2023               [Page 20]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
    After the root causes and impacts are determined, incident-resolve
@@ -1046,7 +1158,7 @@ Internet-Draft             Incident Management                  May 2023
         Author:   Luis Miguel Contreras Murillo <mailto:
                   luismiguel.contrerasmurillo@telefonica.com>
         Author :  Qin Wu   <mailto:bill.wu@huawei.com>
-        Author:   ChaoDe Yu   <mailto:yuchaode@huawei.com>";
+        Author:   Nigel Davis   <mailto:ndavis@ciena.com>";
 
      description
        "This module defines the identities and typedefs for
@@ -1061,9 +1173,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 19]
+Feng, et al.            Expires 31 December 2023               [Page 21]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
         set forth in Section 4.c of the IETF Trust's Legal Provisions
@@ -1117,9 +1229,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 20]
+Feng, et al.            Expires 31 December 2023               [Page 22]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
        description "The abstract identity for incident category.";
@@ -1173,9 +1285,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 21]
+Feng, et al.            Expires 31 December 2023               [Page 23]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
          }
@@ -1229,9 +1341,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 22]
+Feng, et al.            Expires 31 December 2023               [Page 24]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
          "draft-feng-opsawg-incident-management: Incident
@@ -1247,7 +1359,7 @@ Internet-Draft             Incident Management                  May 2023
         Author:   Luis Miguel Contreras Murillo <mailto:
                   luismiguel.contrerasmurillo@telefonica.com>
         Author :  Qin Wu   <mailto:bill.wu@huawei.com>
-        Author:   ChaoDe Yu   <mailto:yuchaode@huawei.com>";
+        Author:   Nigel Davis   <mailto:ndavis@ciena.com>";
 
     description
        "This module defines the interfaces for incident management
@@ -1285,9 +1397,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 23]
+Feng, et al.            Expires 31 December 2023               [Page 25]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
      grouping resources-info {
@@ -1341,9 +1453,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 24]
+Feng, et al.            Expires 31 December 2023               [Page 26]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
                     incident.";
@@ -1397,9 +1509,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 25]
+Feng, et al.            Expires 31 December 2023               [Page 27]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
            enum raised {
@@ -1453,9 +1565,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 26]
+Feng, et al.            Expires 31 December 2023               [Page 28]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
          description "The root cause objects.";
@@ -1509,9 +1621,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 27]
+Feng, et al.            Expires 31 December 2023               [Page 29]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
              type enumeration {
@@ -1565,9 +1677,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 28]
+Feng, et al.            Expires 31 December 2023               [Page 30]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
                      path "/al:alarms/al:alarm-list/al:alarm"
@@ -1621,9 +1733,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 29]
+Feng, et al.            Expires 31 December 2023               [Page 31]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
        description "incident notification. It will be triggered when
@@ -1677,9 +1789,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 30]
+Feng, et al.            Expires 31 December 2023               [Page 32]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
            key incident-id;
@@ -1733,9 +1845,9 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 31]
+Feng, et al.            Expires 31 December 2023               [Page 33]
 
-Internet-Draft             Incident Management                  May 2023
+Internet-Draft             Incident Management                 June 2023
 
 
    The Network Configuration Access Control Model (NACM) [RFC8341]
@@ -1768,13 +1880,38 @@ Internet-Draft             Incident Management                  May 2023
    Futurewei Technologies
    Email: aihuaguo.ietf@gmail.com
 
+   Chaode Yu
+   Huawei
+   yuchaode@huawei.com
+
+   Zhidong Yin
+   Huawei
+   yinzhidong@huawei.com
+
+   Guoxiang Liu
+   Huawei
+   liuguoxiang@huawei.com
+
+   Kaichun Wu
+   Huawei
+   wukaichun@huawei.com
+
+
+
+
+
+
+Feng, et al.            Expires 31 December 2023               [Page 34]
+
+Internet-Draft             Incident Management                 June 2023
+
+
 12.  Acknowledgments
 
    The authors would like to thank Mohamed Boucadair, Thomas Graf,
    Robert Wilton, Benoit Claise, Oscar Gonzalez de Dios, Mahesh
-   Jethanandani, Balazs Lengyel, Bo Wu, Qiufang Ma, Zhidong Yin,
-   Guoxiang Liu, Haomian Zheng, YuanYao for their valuable comments and
-   great input to this work.
+   Jethanandani, Balazs Lengyel, Bo Wu, Qiufang Ma, Haomian Zheng,
+   YuanYao for their valuable comments and great input to this work.
 
 13.  References
 
@@ -1784,15 +1921,6 @@ Internet-Draft             Incident Management                  May 2023
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/info/rfc2119>.
-
-
-
-
-
-Feng, et al.            Expires 18 November 2023               [Page 32]
-
-Internet-Draft             Incident Management                  May 2023
-
 
    [RFC3688]  Mealling, M., "The IETF XML Registry", BCP 81, RFC 3688,
               DOI 10.17487/RFC3688, January 2004,
@@ -1821,6 +1949,19 @@ Internet-Draft             Incident Management                  May 2023
               2023, <https://datatracker.ietf.org/doc/html/draft-ietf-
               opsawg-service-assurance-architecture-13>.
 
+
+
+
+
+
+
+
+
+Feng, et al.            Expires 31 December 2023               [Page 35]
+
+Internet-Draft             Incident Management                 June 2023
+
+
    [I-D.ietf-opsawg-service-assurance-yang]
               Claise, B., Quilbeuf, J., Lucente, P., Fasano, P., and T.
               Arumugam, "YANG Modules for Service Assurance", Work in
@@ -1828,6 +1969,18 @@ Internet-Draft             Incident Management                  May 2023
               assurance-yang-11, 3 January 2023,
               <https://datatracker.ietf.org/doc/html/draft-ietf-opsawg-
               service-assurance-yang-11>.
+
+   [I-D.quilbeuf-opsawg-configuration-tracing]
+              Quilbeuf, J., Claise, B., Graf, T., Lopez, D., and Q. Sun,
+              "External Transaction ID for Configuration Tracing", 13
+              March 2023, <https://www.ietf.org/archive/id/draft-
+              quilbeuf-opsawg-configuration-tracing-01.html>.
+
+   [I-D.rogaglia-netconf-trace-ctx-extension]
+              Gagliano, R., Larsson, K., and J. Lindblad, "NETCONF
+              Extension to support Trace Context propagation", 13 March
+              2023, <https://www.ietf.org/archive/id/draft-rogaglia-
+              netconf-trace-ctx-extension-02.html>.
 
    [I-D.tgraf-yang-push-observation-time]
               Graf, T., Claise, B., and A. Huang Feng, "Support of
@@ -1839,16 +1992,6 @@ Internet-Draft             Incident Management                  May 2023
               Ananthakrishnan, H., and X. Liu, "A YANG Data Model for
               Network Topologies", RFC 8345, DOI 10.17487/RFC8345, March
               2018, <https://www.rfc-editor.org/info/rfc8345>.
-
-
-
-
-
-
-Feng, et al.            Expires 18 November 2023               [Page 33]
-
-Internet-Draft             Incident Management                  May 2023
-
 
    [RFC8632]  Vallin, S. and M. Bjorklund, "A YANG Data Model for Alarm
               Management", RFC 8632, DOI 10.17487/RFC8632, September
@@ -1864,6 +2007,16 @@ Internet-Draft             Incident Management                  May 2023
               VPN Service Performance Monitoring", RFC 9375,
               DOI 10.17487/RFC9375, April 2023,
               <https://www.rfc-editor.org/info/rfc9375>.
+
+
+
+
+
+
+Feng, et al.            Expires 31 December 2023               [Page 36]
+
+Internet-Draft             Incident Management                 June 2023
+
 
    [W3C-Trace-Context]
               W3C, "W3C Recommendation on Trace Context", 23 November
@@ -1898,14 +2051,6 @@ Appendix A.  Changes between revisions
 
 Authors' Addresses
 
-
-
-
-Feng, et al.            Expires 18 November 2023               [Page 34]
-
-Internet-Draft             Incident Management                  May 2023
-
-
    Chong Feng (editor)
    Huawei
    101 Software Avenue, Yuhua District
@@ -1921,6 +2066,14 @@ Internet-Draft             Incident Management                  May 2023
    Hangzhou
    ZheJiang, 311121
    China
+
+
+
+Feng, et al.            Expires 31 December 2023               [Page 37]
+
+Internet-Draft             Incident Management                 June 2023
+
+
    Email: hutong@cmhi.chinamobile.com
 
 
@@ -1940,9 +2093,9 @@ Internet-Draft             Incident Management                  May 2023
    Email: bill.wu@huawei.com
 
 
-   Chaode Yu
-   Huawei
-   Email: yuchaode@huawei.com
+   Nigel Davis
+   Ciena
+   Email: ndavis@ciena.com
 
 
 
@@ -1957,4 +2110,19 @@ Internet-Draft             Incident Management                  May 2023
 
 
 
-Feng, et al.            Expires 18 November 2023               [Page 35]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Feng, et al.            Expires 31 December 2023               [Page 38]
