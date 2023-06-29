@@ -122,6 +122,12 @@
         <email>bill.wu@huawei.com</email>
       </address>
     </author>
+    <author fullname="Chaode Yu" initials="C." surname="Yu">
+        <organization>Huawei</organization>
+        <address>
+            <email>yuchaode@huawei.com</email>
+        </address>
+    </author>
     <author fullname="Nigel Davis" initials="N." surname="Davis">
       <organization>Ciena</organization>
       <address>
@@ -914,6 +920,7 @@ module ietf-incident-types {
      Author:   Luis Miguel Contreras Murillo <mailto:
                luismiguel.contrerasmurillo@telefonica.com>
      Author :  Qin Wu   <mailto:bill.wu@huawei.com>
+     Author:   Chaode Yu   <mailto:yuchaode@huawei.com>
      Author:   Nigel Davis   <mailto:ndavis@ciena.com>";
 
   description
@@ -1087,6 +1094,7 @@ module ietf-incident {
      Author:   Luis Miguel Contreras Murillo <mailto:
                luismiguel.contrerasmurillo@telefonica.com>
      Author :  Qin Wu   <mailto:bill.wu@huawei.com>
+     Author:   Chaode Yu   <mailto:yuchaode@huawei.com>
      Author:   Nigel Davis   <mailto:ndavis@ciena.com>";
 
  description
@@ -1545,15 +1553,6 @@ Aihua Guo
 Futurewei Technologies
 Email: aihuaguo.ietf@gmail.com</artwork>
         </figure></t>
-        <t>
-            <figure>
-                <artwork>
-Chaode Yu
-Huawei
-yuchaode@huawei.com
-                </artwork>
-            </figure>
-        </t>
         <t>
             <figure>
                 <artwork>

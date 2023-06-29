@@ -9,6 +9,7 @@ Expires: 31 December 2023                                           CMCC
                                                            LM. Contreras
                                                           Telefonica I+D
                                                                    Q. Wu
+                                                                   C. Yu
                                                                   Huawei
                                                                 N. Davis
                                                                    Ciena
@@ -46,10 +47,9 @@ Status of This Memo
 
    This Internet-Draft will expire on 31 December 2023.
 
-Copyright Notice
 
-   Copyright (c) 2023 IETF Trust and the persons identified as the
-   document authors.  All rights reserved.
+
+
 
 
 
@@ -57,6 +57,11 @@ Feng, et al.            Expires 31 December 2023                [Page 1]
 
 Internet-Draft             Incident Management                 June 2023
 
+
+Copyright Notice
+
+   Copyright (c) 2023 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
    Provisions Relating to IETF Documents (https://trustee.ietf.org/
@@ -101,11 +106,6 @@ Table of Contents
    9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  33
      9.1.  The "IETF XML" Registry . . . . . . . . . . . . . . . . .  33
      9.2.  The "YANG Module Names" Registry  . . . . . . . . . . . .  33
-   10. Security Considerations . . . . . . . . . . . . . . . . . . .  33
-   11. Contributors  . . . . . . . . . . . . . . . . . . . . . . . .  34
-   12. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  35
-   13. References  . . . . . . . . . . . . . . . . . . . . . . . . .  35
-     13.1.  Normative References . . . . . . . . . . . . . . . . . .  35
 
 
 
@@ -114,8 +114,13 @@ Feng, et al.            Expires 31 December 2023                [Page 2]
 Internet-Draft             Incident Management                 June 2023
 
 
+   10. Security Considerations . . . . . . . . . . . . . . . . . . .  33
+   11. Contributors  . . . . . . . . . . . . . . . . . . . . . . . .  34
+   12. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  34
+   13. References  . . . . . . . . . . . . . . . . . . . . . . . . .  35
+     13.1.  Normative References . . . . . . . . . . . . . . . . . .  35
      13.2.  Informative References . . . . . . . . . . . . . . . . .  35
-   Appendix A.  Changes between revisions  . . . . . . . . . . . . .  37
+   Appendix A.  Changes between revisions  . . . . . . . . . . . . .  36
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  37
 
 1.  Introduction
@@ -157,11 +162,6 @@ Internet-Draft             Incident Management                 June 2023
    alarms,performance metrics and other anomaly data into fewer
    incidents.  There are many solutions in the market today that
    essentially do this to some degree.  But the traditional solutions
-   are time-consuming and labor-intensive which reduces efficiency.
-   Additionally, it quite depends on the experience of maintenance
-   engineers.
-
-
 
 
 
@@ -169,6 +169,10 @@ Feng, et al.            Expires 31 December 2023                [Page 3]
 
 Internet-Draft             Incident Management                 June 2023
 
+
+   are time-consuming and labor-intensive which reduces efficiency.
+   Additionally, it quite depends on the experience of maintenance
+   engineers.
 
    To address these challenges, an incident-centric solution is
    proposed, which also supports cross-domain or cross-layer root cause
@@ -214,10 +218,6 @@ Internet-Draft             Incident Management                 June 2023
    14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
-   The following terms are defined in [RFC8632] are not redefined here:
-
-   *  alarm
-
 
 
 
@@ -225,6 +225,10 @@ Feng, et al.            Expires 31 December 2023                [Page 4]
 
 Internet-Draft             Incident Management                 June 2023
 
+
+   The following terms are defined in [RFC8632] are not redefined here:
+
+   *  alarm
 
    The following terms are defined in this document:
 
@@ -267,10 +271,6 @@ Internet-Draft             Incident Management                 June 2023
    missed if the filtering conditions are too tight.  If the filtering
    conditions are too loose, multiple trouble tickets would be
    dispatched to the same fault.
-
-
-
-
 
 
 
@@ -1158,6 +1158,7 @@ Internet-Draft             Incident Management                 June 2023
         Author:   Luis Miguel Contreras Murillo <mailto:
                   luismiguel.contrerasmurillo@telefonica.com>
         Author :  Qin Wu   <mailto:bill.wu@huawei.com>
+        Author:   Chaode Yu   <mailto:yuchaode@huawei.com>
         Author:   Nigel Davis   <mailto:ndavis@ciena.com>";
 
      description
@@ -1169,7 +1170,6 @@ Internet-Draft             Incident Management                 June 2023
 
         Redistribution and use in source and binary forms, with or
         without modification, is permitted pursuant to, and subject
-        to the license terms contained in, the Revised BSD License
 
 
 
@@ -1178,6 +1178,7 @@ Feng, et al.            Expires 31 December 2023               [Page 21]
 Internet-Draft             Incident Management                 June 2023
 
 
+        to the license terms contained in, the Revised BSD License
         set forth in Section 4.c of the IETF Trust's Legal Provisions
         Relating to IETF Documents
         (https://trustee.ietf.org/license-info).
@@ -1225,7 +1226,6 @@ Internet-Draft             Incident Management                 June 2023
        base incident-domain;
        description "cross domain.";
      }
-     identity incident-category {
 
 
 
@@ -1234,6 +1234,7 @@ Feng, et al.            Expires 31 December 2023               [Page 22]
 Internet-Draft             Incident Management                 June 2023
 
 
+     identity incident-category {
        description "The abstract identity for incident category.";
      }
      identity device {
@@ -1281,7 +1282,6 @@ Internet-Draft             Incident Management                 June 2023
      typedef incident-priority {
        type enumeration {
          enum critical {
-           description "the incident MUST be handled immediately.";
 
 
 
@@ -1290,6 +1290,7 @@ Feng, et al.            Expires 31 December 2023               [Page 23]
 Internet-Draft             Incident Management                 June 2023
 
 
+           description "the incident MUST be handled immediately.";
          }
          enum high {
            description "the incident should be handled as soon as
@@ -1337,7 +1338,6 @@ Internet-Draft             Incident Management                 June 2023
 
      import ietf-incident-types {
        prefix int;
-       reference
 
 
 
@@ -1346,6 +1346,7 @@ Feng, et al.            Expires 31 December 2023               [Page 24]
 Internet-Draft             Incident Management                 June 2023
 
 
+       reference
          "draft-feng-opsawg-incident-management: Incident
           Management for Network Services";
      }
@@ -1359,6 +1360,7 @@ Internet-Draft             Incident Management                 June 2023
         Author:   Luis Miguel Contreras Murillo <mailto:
                   luismiguel.contrerasmurillo@telefonica.com>
         Author :  Qin Wu   <mailto:bill.wu@huawei.com>
+        Author:   Chaode Yu   <mailto:yuchaode@huawei.com>
         Author:   Nigel Davis   <mailto:ndavis@ciena.com>";
 
     description
@@ -1393,8 +1395,6 @@ Internet-Draft             Incident Management                 June 2023
        reference "RFC XXX: Yang module for incident management.";
      }
 
-     //groupings
-
 
 
 Feng, et al.            Expires 31 December 2023               [Page 25]
@@ -1402,6 +1402,7 @@ Feng, et al.            Expires 31 December 2023               [Page 25]
 Internet-Draft             Incident Management                 June 2023
 
 
+     //groupings
      grouping resources-info {
        description "the grouping which defines the network
                     resources of a node.";
@@ -1449,7 +1450,6 @@ Internet-Draft             Incident Management                 June 2023
      }
 
      grouping incident-info {
-       description "the grouping defines the information of an
 
 
 
@@ -1458,6 +1458,7 @@ Feng, et al.            Expires 31 December 2023               [Page 26]
 Internet-Draft             Incident Management                 June 2023
 
 
+       description "the grouping defines the information of an
                     incident.";
        leaf csn {
          type uint64;
@@ -1505,7 +1506,6 @@ Internet-Draft             Incident Management                 June 2023
        }
 
        leaf status {
-         type enumeration {
 
 
 
@@ -1514,6 +1514,7 @@ Feng, et al.            Expires 31 December 2023               [Page 27]
 Internet-Draft             Incident Management                 June 2023
 
 
+         type enumeration {
            enum raised {
              description "an incident instance is raised.";
            }
@@ -1561,7 +1562,6 @@ Internet-Draft             Incident Management                 June 2023
          }
        }
 
-       container root-causes{
 
 
 
@@ -1570,6 +1570,7 @@ Feng, et al.            Expires 31 December 2023               [Page 28]
 Internet-Draft             Incident Management                 June 2023
 
 
+       container root-causes{
          description "The root cause objects.";
          list root-cause {
            key node;
@@ -1617,7 +1618,6 @@ Internet-Draft             Incident Management                 June 2023
          list event {
            key "type event-id";
            description "related events.";
-           leaf type {
 
 
 
@@ -1626,6 +1626,7 @@ Feng, et al.            Expires 31 December 2023               [Page 29]
 Internet-Draft             Incident Management                 June 2023
 
 
+           leaf type {
              type enumeration {
                enum alarm {
                  description "alarm type";
@@ -1673,7 +1674,6 @@ Internet-Draft             Incident Management                 June 2023
                                Management";
                  }
                  leaf alarm-type-qualifier {
-                   type leafref {
 
 
 
@@ -1682,6 +1682,7 @@ Feng, et al.            Expires 31 December 2023               [Page 30]
 Internet-Draft             Incident Management                 June 2023
 
 
+                   type leafref {
                      path "/al:alarms/al:alarm-list/al:alarm"
                          +"[al:resource = current()/../resource]"
                          +"[al:alarm-type-id = current()/.."
@@ -1729,7 +1730,6 @@ Internet-Draft             Incident Management                 June 2023
      }
 
      // notifications
-     notification incident-notification {
 
 
 
@@ -1738,6 +1738,7 @@ Feng, et al.            Expires 31 December 2023               [Page 31]
 Internet-Draft             Incident Management                 June 2023
 
 
+     notification incident-notification {
        description "incident notification. It will be triggered when
                     the incident is raised, updated or cleared.";
        leaf incident-id {
@@ -1785,7 +1786,6 @@ Internet-Draft             Incident Management                 June 2023
                     incidents. The result of resolution will be reported
                     by incident notification.";
        input {
-         list incident {
 
 
 
@@ -1794,6 +1794,7 @@ Feng, et al.            Expires 31 December 2023               [Page 32]
 Internet-Draft             Incident Management                 June 2023
 
 
+         list incident {
            key incident-id;
            min-elements 1;
            description "incident instances.";
@@ -1844,7 +1845,6 @@ Internet-Draft             Incident Management                 June 2023
 
 
 
-
 Feng, et al.            Expires 31 December 2023               [Page 33]
 
 Internet-Draft             Incident Management                 June 2023
@@ -1880,10 +1880,6 @@ Internet-Draft             Incident Management                 June 2023
    Futurewei Technologies
    Email: aihuaguo.ietf@gmail.com
 
-   Chaode Yu
-   Huawei
-   yuchaode@huawei.com
-
    Zhidong Yin
    Huawei
    yinzhidong@huawei.com
@@ -1896,8 +1892,12 @@ Internet-Draft             Incident Management                 June 2023
    Huawei
    wukaichun@huawei.com
 
+12.  Acknowledgments
 
-
+   The authors would like to thank Mohamed Boucadair, Thomas Graf,
+   Robert Wilton, Benoit Claise, Oscar Gonzalez de Dios, Mahesh
+   Jethanandani, Balazs Lengyel, Bo Wu, Qiufang Ma, Haomian Zheng,
+   YuanYao for their valuable comments and great input to this work.
 
 
 
@@ -1905,13 +1905,6 @@ Feng, et al.            Expires 31 December 2023               [Page 34]
 
 Internet-Draft             Incident Management                 June 2023
 
-
-12.  Acknowledgments
-
-   The authors would like to thank Mohamed Boucadair, Thomas Graf,
-   Robert Wilton, Benoit Claise, Oscar Gonzalez de Dios, Mahesh
-   Jethanandani, Balazs Lengyel, Bo Wu, Qiufang Ma, Haomian Zheng,
-   YuanYao for their valuable comments and great input to this work.
 
 13.  References
 
@@ -1949,6 +1942,13 @@ Internet-Draft             Incident Management                 June 2023
               2023, <https://datatracker.ietf.org/doc/html/draft-ietf-
               opsawg-service-assurance-architecture-13>.
 
+   [I-D.ietf-opsawg-service-assurance-yang]
+              Claise, B., Quilbeuf, J., Lucente, P., Fasano, P., and T.
+              Arumugam, "YANG Modules for Service Assurance", Work in
+              Progress, Internet-Draft, draft-ietf-opsawg-service-
+              assurance-yang-11, 3 January 2023,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-opsawg-
+              service-assurance-yang-11>.
 
 
 
@@ -1961,14 +1961,6 @@ Feng, et al.            Expires 31 December 2023               [Page 35]
 
 Internet-Draft             Incident Management                 June 2023
 
-
-   [I-D.ietf-opsawg-service-assurance-yang]
-              Claise, B., Quilbeuf, J., Lucente, P., Fasano, P., and T.
-              Arumugam, "YANG Modules for Service Assurance", Work in
-              Progress, Internet-Draft, draft-ietf-opsawg-service-
-              assurance-yang-11, 3 January 2023,
-              <https://datatracker.ietf.org/doc/html/draft-ietf-opsawg-
-              service-assurance-yang-11>.
 
    [I-D.quilbeuf-opsawg-configuration-tracing]
               Quilbeuf, J., Claise, B., Graf, T., Lopez, D., and Q. Sun,
@@ -2008,16 +2000,6 @@ Internet-Draft             Incident Management                 June 2023
               DOI 10.17487/RFC9375, April 2023,
               <https://www.rfc-editor.org/info/rfc9375>.
 
-
-
-
-
-
-Feng, et al.            Expires 31 December 2023               [Page 36]
-
-Internet-Draft             Incident Management                 June 2023
-
-
    [W3C-Trace-Context]
               W3C, "W3C Recommendation on Trace Context", 23 November
               2021, <https://www.w3.org/TR/2021/REC-trace-context-
@@ -2028,6 +2010,13 @@ Appendix A.  Changes between revisions
    [[RFC editor: please remove this section before publication.]]
 
    v00 - v01
+
+
+
+Feng, et al.            Expires 31 December 2023               [Page 36]
+
+Internet-Draft             Incident Management                 June 2023
+
 
    *  Modify the introduction.
 
@@ -2066,14 +2055,6 @@ Authors' Addresses
    Hangzhou
    ZheJiang, 311121
    China
-
-
-
-Feng, et al.            Expires 31 December 2023               [Page 37]
-
-Internet-Draft             Incident Management                 June 2023
-
-
    Email: hutong@cmhi.chinamobile.com
 
 
@@ -2082,6 +2063,15 @@ Internet-Draft             Incident Management                 June 2023
    Madrid
    Spain
    Email: luismiguel.contrerasmurillo@telefonica.com
+
+
+
+
+
+
+Feng, et al.            Expires 31 December 2023               [Page 37]
+
+Internet-Draft             Incident Management                 June 2023
 
 
    Qin Wu
@@ -2093,9 +2083,19 @@ Internet-Draft             Incident Management                 June 2023
    Email: bill.wu@huawei.com
 
 
+   Chaode Yu
+   Huawei
+   Email: yuchaode@huawei.com
+
+
    Nigel Davis
    Ciena
    Email: ndavis@ciena.com
+
+
+
+
+
 
 
 
